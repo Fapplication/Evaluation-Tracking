@@ -3,190 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bid Management - Procurement Workspace</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="style.css" rel="stylesheet">
+    <title>Bid Lifecycle & Evaluation Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
-    <div id="wrapper">
-        <div id="sidebar">
-            <div class="sidebar-header text-center"><h5 class="mb-0 fw-bold text-white"><i class="fa-solid fa-gavel me-2 text-primary"></i>BID-EVAL CORE</h5></div>
-            <ul class="list-unstyled components">
-                <li><a href="index.html"><i class="fa-solid fa-chart-pie"></i> Dashboard Workspace</a></li>
-                <li class="active"><a href="bids.html"><i class="fa-solid fa-folder-open"></i> Bid Management</a></li>
-                <li><a href="reports.html"><i class="fa-solid fa-file-invoice"></i> Custom Reports</a></li>
-                <li><a href="users.html" id="navUsers"><i class="fa-solid fa-users-gear"></i> User Settings</a></li>
-                <li class="mt-4"><a href="#" onclick="SessionManager.purge()" class="text-danger"><i class="fa-solid fa-right-from-bracket"></i> Disconnect Session</a></li>
-            </ul>
-        </div>
+<body class="bg-slate-100 font-sans text-slate-800 antialiased min-h-screen">
 
-        <div id="content">
-            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <nav class="bg-slate-900 text-white shadow-md px-8 py-4 flex justify-between items-center">
+        <h1 class="text-xl font-bold tracking-tight">Bid Evaluation Portal</h1>
+        <div class="space-x-4">
+            <a href="index.html" class="bg-slate-800 px-4 py-2 rounded text-sm font-medium hover:bg-slate-700 transition">Dashboard Workspace</a>
+            <a href="register-bid.html" class="bg-blue-600 px-4 py-2 rounded text-sm font-medium hover:bg-blue-500 transition">+ Register New Bid</a>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto py-10 px-4">
+        <div class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden">
+            <div class="p-6 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
                 <div>
-                    <h3 class="fw-bold text-dark">Procurement Lifecycle Inventory</h3>
-                    <p class="text-muted small mb-0">Register operational bid files and adjust active pipelines.</p>
+                    <h2 class="text-lg font-bold text-slate-900">Active Procurement Pipeline</h2>
+                    <p class="text-sm text-slate-500">Click any row record to transition, log or advance evaluation lifecycles.</p>
                 </div>
-                <button class="btn btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#newBidModal"><i class="fa-solid fa-plus me-2"></i>Initialize New Bid</button>
             </div>
 
-            <div class="card p-3 mb-4">
-                <div class="row g-2">
-                    <div class="col-md-4"><input type="text" id="srcQuery" class="form-control form-control-sm" placeholder="Search by ID, Bid Number, Project Name..." onkeyup="filterInventoryTable()"></div>
-                    <div class="col-md-3">
-                        <select id="fltStatus" class="form-select form-select-sm" onchange="filterInventoryTable()">
-                            <option value="">All Workflow Statuses</option>
-                            <option value="Technical Evaluation">Technical Evaluation</option>
-                            <option value="Financial Evaluation">Financial Evaluation</option>
-                            <option value="Award Recommended">Award Recommended</option>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-900 text-white uppercase text-xs tracking-wider">
+                            <th class="p-4">Bid Number</th>
+                            <th class="p-4">Bid Name</th>
+                            <th class="p-4">Eng. Estimation</th>
+                            <th class="p-4">Approved Budget</th>
+                            <th class="p-4">Type</th>
+                            <th class="p-4">PAC Level</th>
+                            <th class="p-4">Current Phase Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bids-table-body" class="divide-y divide-slate-200">
+                        <!-- Instantiated dynamically inside app.js script layer -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Full Tracking Lifecycle Update Modal Overlay Overlay Layout Map -->
+    <div id="update-modal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center p-4 backdrop-blur-sm z-50 overflow-y-auto">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto flex flex-col transform transition-all">
+            <div class="p-6 bg-slate-900 text-white flex justify-between items-center sticky top-0 z-10">
+                <h3 class="text-xl font-bold" id="modalBidTitle">Update Bid Milestones</h3>
+                <button onclick="closeEvaluationUpdateModal()" class="text-slate-400 hover:text-white text-2xl font-bold">&times;</button>
+            </div>
+            <input type="hidden" id="modalBidNumber">
+
+            <div class="p-6 space-y-6 overflow-y-auto flex-1 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Tech Tracking Matrix Column Block -->
+                <div class="space-y-4 border-r border-slate-100 pr-0 md:pr-4">
+                    <h4 class="text-sm font-extrabold uppercase tracking-wide text-blue-600 border-b pb-1">1. Technical Evaluation Horizon</h4>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Date Tech Doc Collected</label>
+                        <input type="date" id="dateTechDocCollected" class="w-full border border-slate-300 rounded p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Progress of Tech Eval</label>
+                        <textarea id="progressOfTechEval" rows="2" class="w-full border border-slate-300 rounded p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="e.g., Committee reviewing structural criteria"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Clarifications / Remarks</label>
+                        <textarea id="clarificationRemarks" rows="2" class="w-full border border-slate-300 rounded p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Enter formal clarification queries sent to vendors"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Tech Report Submittal Date</label>
+                        <input type="date" id="techEvalReportSubmittal" class="w-full border border-slate-300 rounded p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Decision & Bidders Passed for Financial round</label>
+                        <textarea id="techDecisionPassedBidders" rows="2" class="w-full border border-slate-300 rounded p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="e.g., Approved: Vendor A, Vendor C"></textarea>
+                    </div>
+                </div>
+
+                <!-- Financial Tracking Matrix Column Block -->
+                <div class="space-y-4">
+                    <h4 class="text-sm font-extrabold uppercase tracking-wide text-purple-600 border-b pb-1">2. Financial Evaluation & Post Qual</h4>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Collection of Financial Document</label>
+                        <input type="date" id="collectionOfFinancialDoc" class="w-full border border-slate-300 rounded p-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Progress of Financial Evaluation</label>
+                        <select id="progressOfFinancialEval" class="w-full border border-slate-300 rounded p-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
+                            <option value="Document Evaluation">Document Evaluation</option>
+                            <option value="Waiting for Engineering estimation and approved budget">Waiting for Engineering estimation and approved budget</option>
                         </select>
                     </div>
-                    <div class="col-md-3"><input type="text" id="srcEvaluator" class="form-control form-control-sm" placeholder="Evaluator filter..." onkeyup="filterInventoryTable()"></div>
-                    <div class="col-md-2"><button class="btn btn-secondary btn-sm w-full font-bold" onclick="resetFilters()">Reset</button></div>
-                </div>
-            </div>
-
-            <div class="card shadow-sm border-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0" id="bidsTable" style="font-size:0.9rem;">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Bid Code</th>
-                                <th>Project Spec / Identifier</th>
-                                <th>Procuring Entity</th>
-                                <th>Budget</th>
-                                <th>Target Date Range</th>
-                                <th>Assigned To</th>
-                                <th>Status/Track</th>
-                                <th class="text-center">Action Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="bidsTableBody">
-                            <tr><td colspan="8" class="text-center py-4 text-muted"><span class="spinner-border spinner-border-sm me-2"></span>Streaming structural procurement state data...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="newBidModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
-                <form id="bidForm">
-                    <div class="modal-header"><h5 class="modal-title fw-bold">Register Operational Procurement Bid</h5><button type="button" class="btn-close" data-bs-toggle="modal" data-bs-target="#newBidModal"></button></div>
-                    <div class="modal-body py-3 row g-3">
-                        <div class="col-md-6"><label class="form-label small fw-bold">Bid Number References</label><input type="text" id="bidNumber" class="form-control form-control-sm" required></div>
-                        <div class="col-md-6"><label class="form-label small fw-bold">Project / Deliverable Title</label><input type="text" id="projectName" class="form-control form-control-sm" required></div>
-                        <div class="col-md-6"><label class="form-label small fw-bold">Procuring Entity Agency</label><input type="text" id="procuringEntity" class="form-control form-control-sm" required></div>
-                        <div class="col-md-6"><label class="form-label small fw-bold">Authorized Budget Valuation (USD)</label><input type="number" step="0.01" id="budgetAmount" class="form-control form-control-sm" required></div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold">Procurement Methods Specification</label>
-                            <select id="procurementMethod" class="form-select form-select-sm">
-                                <option value="Open Competitive Bidding">Open Competitive Bidding</option>
-                                <option value="Restricted Tendering Protocol">Restricted Tendering Protocol</option>
-                                <option value="Single-Source Direct RFQ">Single-Source Direct RFQ</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6"><label class="form-label small fw-bold">Submission Matrix Date</label><input type="date" id="submissionDate" class="form-control form-control-sm" required></div>
-                        <div class="col-md-4"><label class="form-label small fw-bold">Official Opening Timestamp</label><input type="date" id="openingDate" class="form-control form-control-sm" required></div>
-                        <div class="col-md-4"><label class="form-label small fw-bold">Evaluation Window Initialization</label><input type="date" id="evalStartDate" class="form-control form-control-sm" required></div>
-                        <div class="col-md-4"><label class="form-label small fw-bold">Evaluation Targeted End Deadline</label><input type="date" id="evalEndDate" class="form-control form-control-sm" required></div>
-                        <div class="col-md-12"><label class="form-label small fw-bold">Assigned Committee Lead / Evaluator ID</label><input type="text" id="assignedEvaluator" class="form-control form-control-sm" placeholder="Committee chair or officer username" required></div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Post Qualification Phase</label>
+                        <textarea id="postQualification" rows="2" class="w-full border border-slate-300 rounded p-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none" placeholder="Background/due diligence check compliance records..."></textarea>
                     </div>
-                    <div class="modal-footer"><button type="button" class="btn btn-sm btn-secondary font-bold" data-bs-toggle="modal" data-bs-target="#newBidModal">Dismiss</button><button type="submit" class="btn btn-sm btn-primary font-bold">Mount Operational Record</button></div>
-                </form>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Submittal of Financial Report</label>
+                        <input type="date" id="submittalOfFinancialReport" class="w-full border border-slate-300 rounded p-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none">
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-between items-center sticky bottom-0 z-10">
+                <div id="modal-spinner" class="hidden text-sm text-slate-600 animate-pulse font-medium">Synchronizing Cloud Data Node...</div>
+                <div class="space-x-2 ml-auto">
+                    <button onclick="closeEvaluationUpdateModal()" class="px-4 py-2 border border-slate-300 rounded text-slate-700 bg-white hover:bg-slate-100 font-medium text-sm">Cancel</button>
+                    <button onclick="saveModalProgressUpdates()" class="px-5 py-2 bg-blue-600 text-white rounded hover:bg-blue-500 font-bold text-sm shadow-md">Commit Progress Changes</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="config.js"></script>
-    <script src="app.js"></script>
-    <script>
-        let fullBidsCache = [];
-        document.addEventListener("DOMContentLoaded", () => fetchInventoryStore());
-
-        async function fetchInventoryStore() {
-            try {
-                fullBidsCache = await AppAPI.get({ action: "getBids" });
-                renderTable(fullBidsCache);
-            } catch(err) {
-                document.getElementById('bidsTableBody').innerHTML = `<tr><td colspan="8" class="text-center text-danger py-3">Error gathering inventory dataset indices from server stack.</td></tr>`;
-            }
-        }
-
-        function renderTable(dataArr) {
-            const b = document.getElementById('bidsTableBody');
-            if(dataArr.length === 0) { b.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3">No matching active records found inside directory index.</td></tr>`; return; }
-            
-            b.innerHTML = dataArr.map(x => `
-                <tr>
-                    <td class="fw-bold text-dark font-mono">${x.bid_id}</td>
-                    <td><div class="fw-bold">${x.bid_number}</div><div class="text-muted extra-small" style="font-size:0.8rem">${x.project_name}</div></td>
-                    <td>${x.procuring_entity}</td>
-                    <td class="font-mono">$${Number(x.budget_amount).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-                    <td class="small">${x.eval_start_date} <i class="fa-solid fa-arrow-right text-muted px-1" style="font-size:0.75rem"></i> ${x.eval_end_date}</td>
-                    <td><span class="badge bg-light text-dark border"><i class="fa-solid fa-user-tie me-1 text-secondary"></i>${x.assigned_evaluator}</span></td>
-                    <td>
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="progress w-full" style="height:6px; min-width:60px;">
-                                <div class="progress-bar ${x.completion_percentage >= 75 ? 'bg-success' : x.completion_percentage >= 40 ? 'bg-warning' : 'bg-danger'}" style="width: ${x.completion_percentage}%"></div>
-                            </div>
-                            <span class="small font-mono font-bold">${x.completion_percentage}%</span>
-                        </div>
-                        <div class="extra-small mt-1 ${x.risk_indicator === 'High Risk' ? 'text-danger' : x.risk_indicator === 'Medium Risk' ? 'text-warning' : 'text-success'}" style="font-size:0.75rem; font-weight:bold;"><i class="fa-solid fa-triangle-exclamation me-1"></i>${x.status}</div>
-                    </td>
-                    <td class="text-center"><a href="bid-detail.html?bid_id=${x.bid_id}" class="btn btn-sm btn-outline-primary px-2 py-1" style="font-size:0.75rem;"><i class="fa-solid fa-network-wired me-1"></i>Open Pipeline</a></td>
-                </tr>
-            `).join('');
-        }
-
-        document.getElementById('bidForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const payload = {
-                action: "createBid",
-                bid_number: document.getElementById('bidNumber').value.trim(),
-                project_name: document.getElementById('projectName').value.trim(),
-                procuring_entity: document.getElementById('procuringEntity').value.trim(),
-                budget_amount: parseFloat(document.getElementById('budgetAmount').value),
-                procurement_method: document.getElementById('procurementMethod').value,
-                submission_date: document.getElementById('submissionDate').value,
-                opening_date: document.getElementById('openingDate').value,
-                eval_start_date: document.getElementById('evalStartDate').value,
-                eval_end_date: document.getElementById('evalEndDate').value,
-                assigned_evaluator: document.getElementById('assignedEvaluator').value.trim()
-            };
-            try {
-                const res = await AppAPI.post(payload);
-                if(res.success) {
-                    bootstrap.Modal.getInstance(document.getElementById('newBidModal')).hide();
-                    document.getElementById('bidForm').reset();
-                    fetchInventoryStore();
-                } else { alert("Operational pipeline error mounting bid item entry."); }
-            } catch(ex) { alert("Execution crash communicating upstream database transaction."); }
-        });
-
-        function filterInventoryTable() {
-            const q = document.getElementById('srcQuery').value.toLowerCase();
-            const s = document.getElementById('fltStatus').value;
-            const ev = document.getElementById('srcEvaluator').value.toLowerCase();
-
-            const match = fullBidsCache.filter(item => {
-                const txtMatch = item.bid_id.toLowerCase().includes(q) || item.bid_number.toLowerCase().includes(q) || item.project_name.toLowerCase().includes(q);
-                const statMatch = s === "" ? true : item.status === s;
-                const evalMatch = ev === "" ? true : item.assigned_evaluator.toLowerCase().includes(ev);
-                return txtMatch && statMatch && evalMatch;
-            });
-            renderTable(match);
-        }
-
-        function resetFilters() {
-            document.getElementById('srcQuery').value = "";
-            document.getElementById('fltStatus').value = "";
-            document.getElementById('srcEvaluator').value = "";
-            renderTable(fullBidsCache);
-        }
-    </script>
+    <script src="js/config.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>
