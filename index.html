@@ -3,326 +3,189 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fast-Track Bid Progress Logs</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Bid Management - Procurement Workspace</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans">
+<body>
+    <div id="wrapper">
+        <div id="sidebar">
+            <div class="sidebar-header text-center"><h5 class="mb-0 fw-bold text-white"><i class="fa-solid fa-gavel me-2 text-primary"></i>BID-EVAL CORE</h5></div>
+            <ul class="list-unstyled components">
+                <li><a href="index.html"><i class="fa-solid fa-chart-pie"></i> Dashboard Workspace</a></li>
+                <li class="active"><a href="bids.html"><i class="fa-solid fa-folder-open"></i> Bid Management</a></li>
+                <li><a href="reports.html"><i class="fa-solid fa-file-invoice"></i> Custom Reports</a></li>
+                <li><a href="users.html" id="navUsers"><i class="fa-solid fa-users-gear"></i> User Settings</a></li>
+                <li class="mt-4"><a href="#" onclick="SessionManager.purge()" class="text-danger"><i class="fa-solid fa-right-from-bracket"></i> Disconnect Session</a></li>
+            </ul>
+        </div>
 
-    <!-- FAST LOGIN LAYER -->
-    <div id="loginGate" class="fixed inset-0 bg-slate-900 bg-opacity-80 flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
-            <div class="text-center mb-6">
-                <div class="inline-flex p-3 bg-indigo-50 text-indigo-600 rounded-xl mb-3">
-                    <i class="fa-solid fa-bolt-lightning text-2xl"></i>
-                </div>
-                <h2 class="text-xl font-bold">Bid Logging Console</h2>
-                <p class="text-gray-400 text-xs mt-1">Select account workspace to begin</p>
-            </div>
-            <form onsubmit="bypassLogin(event)" class="space-y-4">
+        <div id="content">
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">User Privilege</label>
-                    <select id="userRole" class="w-full bg-slate-100 border-0 rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-                        <option value="Staff Log Operator">Staff (Write Updates)</option>
-                        <option value="System Administrator">Admin (Full Workspace)</option>
-                    </select>
+                    <h3 class="fw-bold text-dark">Procurement Lifecycle Inventory</h3>
+                    <p class="text-muted small mb-0">Register operational bid files and adjust active pipelines.</p>
                 </div>
-                <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold p-3 rounded-xl transition text-sm">
-                    Access Live Environment
-                </button>
-            </form>
+                <button class="btn btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#newBidModal"><i class="fa-solid fa-plus me-2"></i>Initialize New Bid</button>
+            </div>
+
+            <div class="card p-3 mb-4">
+                <div class="row g-2">
+                    <div class="col-md-4"><input type="text" id="srcQuery" class="form-control form-control-sm" placeholder="Search by ID, Bid Number, Project Name..." onkeyup="filterInventoryTable()"></div>
+                    <div class="col-md-3">
+                        <select id="fltStatus" class="form-select form-select-sm" onchange="filterInventoryTable()">
+                            <option value="">All Workflow Statuses</option>
+                            <option value="Technical Evaluation">Technical Evaluation</option>
+                            <option value="Financial Evaluation">Financial Evaluation</option>
+                            <option value="Award Recommended">Award Recommended</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3"><input type="text" id="srcEvaluator" class="form-control form-control-sm" placeholder="Evaluator filter..." onkeyup="filterInventoryTable()"></div>
+                    <div class="col-md-2"><button class="btn btn-secondary btn-sm w-full font-bold" onclick="resetFilters()">Reset</button></div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" id="bidsTable" style="font-size:0.9rem;">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Bid Code</th>
+                                <th>Project Spec / Identifier</th>
+                                <th>Procuring Entity</th>
+                                <th>Budget</th>
+                                <th>Target Date Range</th>
+                                <th>Assigned To</th>
+                                <th>Status/Track</th>
+                                <th class="text-center">Action Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bidsTableBody">
+                            <tr><td colspan="8" class="text-center py-4 text-muted"><span class="spinner-border spinner-border-sm me-2"></span>Streaming structural procurement state data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- MAIN PORTAL WRAPPER -->
-    <div id="portalDashboard" class="hidden min-h-screen flex flex-col lg:flex-row">
-        
-        <!-- COMPACT CONTROL DOCK -->
-        <aside class="w-full lg:w-80 bg-slate-900 text-slate-300 p-6 flex flex-col justify-between border-r border-slate-800">
-            <div class="space-y-8">
-                <div class="flex items-center gap-3">
-                    <span class="p-2 bg-indigo-600 text-white rounded-lg text-xs font-black">FAST</span>
-                    <h1 class="text-lg font-bold text-white tracking-tight">BidProgress Engine</h1>
-                </div>
-
-                <!-- QUICK DISPATCH FORM -->
-                <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
-                    <h2 class="text-xs font-bold text-white tracking-widest uppercase mb-3 text-indigo-400">Initialize New Tracker Line</h2>
-                    <form onsubmit="quickRegister(event)" class="space-y-3">
-                        <input type="text" id="bidId" placeholder="Bid Ref (e.g. B-99)" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:border-indigo-500 outline-none" required>
-                        <input type="text" id="bidTitle" placeholder="Project Name / Brief Description" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:border-indigo-500 outline-none" required>
-                        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-2.5 px-4 rounded-lg transition flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-plus text-[10px]"></i> Mount onto Board
-                        </button>
-                    </form>
-                </div>
-            </div>
-
-            <div class="mt-8 pt-4 border-t border-slate-800 flex items-center justify-between text-xs">
-                <div>
-                    <p class="font-bold text-white" id="activeRoleLabel">-</p>
-                    <p class="text-emerald-400 text-[10px] flex items-center gap-1 mt-0.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Streaming to Sheets</p>
-                </div>
-                <button onclick="window.location.reload()" class="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition"><i class="fa-solid fa-power-off"></i></button>
-            </div>
-        </aside>
-
-        <!-- STREAMLINED EVALUATION MONITORING ROW -->
-        <main class="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 overflow-y-auto">
-            
-            <!-- EXPORT & KPI RIBBON -->
-            <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-xl border border-slate-200/60">
-                <div class="flex flex-wrap gap-4 items-center">
-                    <div class="text-xs font-medium px-3 py-1.5 bg-slate-100 rounded-lg"><span class="text-slate-400">Total Lines:</span> <strong id="cntAll" class="text-slate-800">0</strong></div>
-                    <div class="text-xs font-medium px-3 py-1.5 bg-amber-50 text-amber-700 rounded-lg"><span class="text-amber-400">Technical:</span> <strong id="cntTech">0</strong></div>
-                    <div class="text-xs font-medium px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-lg"><span class="text-indigo-400">Financial:</span> <strong id="cntFin">0</strong></div>
-                </div>
-                <div class="flex gap-2 w-full sm:w-auto">
-                    <button onclick="mockExport('Excel Data Strip')" class="flex-1 sm:flex-initial bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold py-2 px-3 rounded-lg border border-emerald-200 transition flex items-center justify-center gap-1.5"><i class="fa-solid fa-file-excel"></i> Excel</button>
-                    <button onclick="mockExport('Monthly Summary PDF')" class="flex-1 sm:flex-initial bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold py-2 px-3 rounded-lg border border-rose-200 transition flex items-center justify-center gap-1.5"><i class="fa-solid fa-file-pdf"></i> Monthly PDF</button>
-                </div>
-            </header>
-
-            <!-- SLICK VISUAL METRICS BOARD -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="bg-white p-4 rounded-xl border border-slate-200/60 h-48 flex flex-col justify-between">
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Monthly Registration Trend</h3>
-                    <div class="flex-1 min-h-0 relative mt-2"><canvas id="trendChart"></canvas></div>
-                </div>
-                <div class="bg-white p-4 rounded-xl border border-slate-200/60 h-48 flex flex-col justify-between">
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Milestone Distribution Balance</h3>
-                    <div class="flex-1 min-h-0 relative mt-2"><canvas id="distributionChart"></canvas></div>
-                </div>
-            </div>
-
-            <!-- INTERACTIVE PROGRESS MATRIX COMPONENT -->
-            <div class="bg-white rounded-xl border border-slate-200/60 shadow-sm overflow-hidden">
-                <div class="px-4 py-3.5 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
-                    <h3 class="text-sm font-bold text-slate-700">Active Board Logs</h3>
-                    <span class="text-[10px] uppercase font-mono tracking-widest px-2 py-0.5 bg-slate-200 text-slate-600 rounded">Manual Entry Mode</span>
-                </div>
-                
-                <div class="divide-y divide-slate-100" id="matrixContainer">
-                    <!-- Blank state placeholder -->
-                    <div id="blankState" class="p-12 text-center text-slate-400 text-xs">
-                        <i class="fa-solid fa-layer-group text-3xl text-slate-300 mb-2 block"></i>
-                        No active items logged. Mount a bid on the left dashboard to begin tracking.
+    <div class="modal fade" id="newBidModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <form id="bidForm">
+                    <div class="modal-header"><h5 class="modal-title fw-bold">Register Operational Procurement Bid</h5><button type="button" class="btn-close" data-bs-toggle="modal" data-bs-target="#newBidModal"></button></div>
+                    <div class="modal-body py-3 row g-3">
+                        <div class="col-md-6"><label class="form-label small fw-bold">Bid Number References</label><input type="text" id="bidNumber" class="form-control form-control-sm" required></div>
+                        <div class="col-md-6"><label class="form-label small fw-bold">Project / Deliverable Title</label><input type="text" id="projectName" class="form-control form-control-sm" required></div>
+                        <div class="col-md-6"><label class="form-label small fw-bold">Procuring Entity Agency</label><input type="text" id="procuringEntity" class="form-control form-control-sm" required></div>
+                        <div class="col-md-6"><label class="form-label small fw-bold">Authorized Budget Valuation (USD)</label><input type="number" step="0.01" id="budgetAmount" class="form-control form-control-sm" required></div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Procurement Methods Specification</label>
+                            <select id="procurementMethod" class="form-select form-select-sm">
+                                <option value="Open Competitive Bidding">Open Competitive Bidding</option>
+                                <option value="Restricted Tendering Protocol">Restricted Tendering Protocol</option>
+                                <option value="Single-Source Direct RFQ">Single-Source Direct RFQ</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6"><label class="form-label small fw-bold">Submission Matrix Date</label><input type="date" id="submissionDate" class="form-control form-control-sm" required></div>
+                        <div class="col-md-4"><label class="form-label small fw-bold">Official Opening Timestamp</label><input type="date" id="openingDate" class="form-control form-control-sm" required></div>
+                        <div class="col-md-4"><label class="form-label small fw-bold">Evaluation Window Initialization</label><input type="date" id="evalStartDate" class="form-control form-control-sm" required></div>
+                        <div class="col-md-4"><label class="form-label small fw-bold">Evaluation Targeted End Deadline</label><input type="date" id="evalEndDate" class="form-control form-control-sm" required></div>
+                        <div class="col-md-12"><label class="form-label small fw-bold">Assigned Committee Lead / Evaluator ID</label><input type="text" id="assignedEvaluator" class="form-control form-control-sm" placeholder="Committee chair or officer username" required></div>
                     </div>
-                </div>
+                    <div class="modal-footer"><button type="button" class="btn btn-sm btn-secondary font-bold" data-bs-toggle="modal" data-bs-target="#newBidModal">Dismiss</button><button type="submit" class="btn btn-sm btn-primary font-bold">Mount Operational Record</button></div>
+                </form>
             </div>
-
-        </main>
+        </div>
     </div>
 
-    <!-- MAIN OPERATIONAL CONTROLLER SCRIPT -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="config.js"></script>
+    <script src="app.js"></script>
     <script>
-        let sessionRole = "";
-        let trackedBids = [];
-        let chrtTrend, chrtDist;
+        let fullBidsCache = [];
+        document.addEventListener("DOMContentLoaded", () => fetchInventoryStore());
 
-        function bypassLogin(e) {
-            e.preventDefault();
-            sessionRole = document.getElementById('userRole').value;
-            document.getElementById('activeRoleLabel').innerText = sessionRole;
-            document.getElementById('loginGate').classList.add('hidden');
-            document.getElementById('portalDashboard').classList.remove('hidden');
-            setupCharts();
-            syncRender();
+        async function fetchInventoryStore() {
+            try {
+                fullBidsCache = await AppAPI.get({ action: "getBids" });
+                renderTable(fullBidsCache);
+            } catch(err) {
+                document.getElementById('bidsTableBody').innerHTML = `<tr><td colspan="8" class="text-center text-danger py-3">Error gathering inventory dataset indices from server stack.</td></tr>`;
+            }
         }
 
-        function quickRegister(e) {
-            e.preventDefault();
-            const id = document.getElementById('bidId').value.trim();
-            const title = document.getElementById('bidTitle').value.trim();
-
-            if (trackedBids.some(b => b.id.toLowerCase() === id.toLowerCase())) {
-                alert("This Bid Reference key already exists on the logging matrix.");
-                return;
-            }
-
-            const modelInstance = {
-                id, title,
-                date: new Date().toLocaleDateString(),
-                currentPhase: "Technical Evaluation Phase",
-                // Unrestricted flat schema array representing exact architecture steps
-                m_t1: false, m_t2: false, m_t3: false, m_t4: false, m_t5: false,
-                m_f1: false, m_f2: false, m_f3: false, m_f4: false, m_f5: false, m_f6: false,
-                notes: ""
-            };
-
-            trackedBids.unshift(modelInstance);
-            document.getElementById('bidId').value = "";
-            document.getElementById('bidTitle').value = "";
+        function renderTable(dataArr) {
+            const b = document.getElementById('bidsTableBody');
+            if(dataArr.length === 0) { b.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3">No matching active records found inside directory index.</td></tr>`; return; }
             
-            syncRender();
-            executeWebhook(modelInstance, "INSERT_ROW");
-        }
-
-        function flipSwitch(id, milestoneKey) {
-            const index = trackedBids.findIndex(b => b.id === id);
-            if (index === -1) return;
-
-            trackedBids[index][milestoneKey] = !trackedBids[index][milestoneKey];
-            
-            // Fast Phase Detection logic based on manual activity mapping
-            if(trackedBids[index].m_f6) {
-                trackedBids[index].currentPhase = "Evaluation Finalized";
-            } else if (trackedBids[index].m_f1 || trackedBids[index].m_f2 || trackedBids[index].m_f3 || trackedBids[index].m_f4 || trackedBids[index].m_f5) {
-                trackedBids[index].currentPhase = "Financial Evaluation Phase";
-            } else {
-                trackedBids[index].currentPhase = "Technical Evaluation Phase";
-            }
-
-            syncRender();
-            executeWebhook(trackedBids[index], "MODIFY_STATE");
-        }
-
-        function updateLogNotes(id, text) {
-            const item = trackedBids.find(b => b.id === id);
-            if(item) {
-                item.notes = text;
-                executeWebhook(item, "APPEND_NOTES");
-            }
-        }
-
-        function syncRender() {
-            const target = document.getElementById('matrixContainer');
-            const blank = document.getElementById('blankState');
-
-            if(trackedBids.length === 0) {
-                blank.classList.remove('hidden');
-                return;
-            }
-            blank.classList.add('hidden');
-
-            // Strip current nodes inside innerHTML container securely
-            const itemsMarkup = trackedBids.map(bid => `
-                <div class="p-4 sm:p-6 bg-white hover:bg-slate-50/50 transition duration-150">
-                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs font-mono font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">${bid.id}</span>
-                                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                                    bid.currentPhase.includes('Finalized') ? 'bg-emerald-100 text-emerald-800' : 
-                                    bid.currentPhase.includes('Financial') ? 'bg-purple-100 text-purple-800' : 'bg-amber-100 text-amber-800'
-                                }">${bid.currentPhase}</span>
+            b.innerHTML = dataArr.map(x => `
+                <tr>
+                    <td class="fw-bold text-dark font-mono">${x.bid_id}</td>
+                    <td><div class="fw-bold">${x.bid_number}</div><div class="text-muted extra-small" style="font-size:0.8rem">${x.project_name}</div></td>
+                    <td>${x.procuring_entity}</td>
+                    <td class="font-mono">$${Number(x.budget_amount).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                    <td class="small">${x.eval_start_date} <i class="fa-solid fa-arrow-right text-muted px-1" style="font-size:0.75rem"></i> ${x.eval_end_date}</td>
+                    <td><span class="badge bg-light text-dark border"><i class="fa-solid fa-user-tie me-1 text-secondary"></i>${x.assigned_evaluator}</span></td>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="progress w-full" style="height:6px; min-width:60px;">
+                                <div class="progress-bar ${x.completion_percentage >= 75 ? 'bg-success' : x.completion_percentage >= 40 ? 'bg-warning' : 'bg-danger'}" style="width: ${x.completion_percentage}%"></div>
                             </div>
-                            <h4 class="text-sm font-bold text-slate-800 mt-1">${bid.title}</h4>
+                            <span class="small font-mono font-bold">${x.completion_percentage}%</span>
                         </div>
-                        <div class="text-[11px] text-slate-400 font-medium">Logged on: ${bid.date}</div>
-                    </div>
-
-                    <!-- ARCHITECTURE LOG GRID MATRIX -->
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 bg-slate-50/70 p-3 rounded-xl border border-slate-200/50">
-                        
-                        <!-- TECHNICAL CHECKBLOCKS -->
-                        <div>
-                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1"><i class="fa-solid fa-microchip text-amber-500"></i> Technical Stage</p>
-                            <div class="flex flex-wrap gap-1.5">
-                                ${pillButton(bid.id, 'm_t1', 'Doc Collection', bid.m_t1)}
-                                ${pillButton(bid.id, 'm_t2', 'Evaluation Progress', bid.m_t2)}
-                                ${pillButton(bid.id, 'm_t3', 'Clarification', bid.m_t3)}
-                                ${pillButton(bid.id, 'm_t4', 'Report Submit', bid.m_t4)}
-                                ${pillButton(bid.id, 'm_t5', 'Appeal Handle', bid.m_t5)}
-                            </div>
-                        </div>
-
-                        <!-- FINANCIAL CHECKBLOCKS -->
-                        <div>
-                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1"><i class="fa-solid fa-wallet text-indigo-500"></i> Financial Stage</p>
-                            <div class="flex flex-wrap gap-1.5">
-                                ${pillButton(bid.id, 'm_f1', 'Doc Collection', bid.m_f1)}
-                                ${pillButton(bid.id, 'm_f2', 'Estimate Req', bid.m_f2)}
-                                ${pillButton(bid.id, 'm_f3', 'Budget Verify', bid.m_f3)}
-                                ${pillButton(bid.id, 'm_f4', 'Evaluation Progress', bid.m_f4)}
-                                ${pillButton(bid.id, 'm_f5', 'Report Submit', bid.m_f5)}
-                                ${pillButton(bid.id, 'm_f6', 'Post Qual', bid.m_f6)}
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <!-- RUNNING LOG MEMO -->
-                    <div class="mt-3 flex items-center gap-2">
-                        <span class="text-[11px] font-medium text-slate-400 whitespace-nowrap">Daily Memo:</span>
-                        <input type="text" value="${bid.notes}" onchange="updateLogNotes('${bid.id}', this.value)" placeholder="Enter update notes for report outputs..." class="w-full bg-transparent border-b border-transparent hover:border-slate-200 focus:border-indigo-500 focus:bg-white px-2 py-1 text-xs outline-none rounded transition">
-                    </div>
-                </div>
+                        <div class="extra-small mt-1 ${x.risk_indicator === 'High Risk' ? 'text-danger' : x.risk_indicator === 'Medium Risk' ? 'text-warning' : 'text-success'}" style="font-size:0.75rem; font-weight:bold;"><i class="fa-solid fa-triangle-exclamation me-1"></i>${x.status}</div>
+                    </td>
+                    <td class="text-center"><a href="bid-detail.html?bid_id=${x.bid_id}" class="btn btn-sm btn-outline-primary px-2 py-1" style="font-size:0.75rem;"><i class="fa-solid fa-network-wired me-1"></i>Open Pipeline</a></td>
+                </tr>
             `).join('');
-
-            // Patch existing layout tree nodes
-            const placeholder = blank.outerHTML;
-            target.innerHTML = placeholder + itemsMarkup;
-            if(trackedBids.length > 0) document.getElementById('blankState').classList.add('hidden');
-
-            refreshVisualMetrics();
         }
 
-        function pillButton(bidId, key, label, isChecked) {
-            return `
-                <button onclick="flipSwitch('${bidId}', '${key}')" class="px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition flex items-center gap-1.5 border select-none ${
-                    isChecked 
-                    ? 'bg-slate-900 border-slate-900 text-white shadow-sm' 
-                    : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-100'
-                }">
-                    <i class="fa-solid ${isChecked ? 'fa-square-check text-indigo-400' : 'fa-square text-slate-300'}"></i>
-                    ${label}
-                </button>
-            `;
-        }
+        document.getElementById('bidForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                action: "createBid",
+                bid_number: document.getElementById('bidNumber').value.trim(),
+                project_name: document.getElementById('projectName').value.trim(),
+                procuring_entity: document.getElementById('procuringEntity').value.trim(),
+                budget_amount: parseFloat(document.getElementById('budgetAmount').value),
+                procurement_method: document.getElementById('procurementMethod').value,
+                submission_date: document.getElementById('submissionDate').value,
+                opening_date: document.getElementById('openingDate').value,
+                eval_start_date: document.getElementById('evalStartDate').value,
+                eval_end_date: document.getElementById('evalEndDate').value,
+                assigned_evaluator: document.getElementById('assignedEvaluator').value.trim()
+            };
+            try {
+                const res = await AppAPI.post(payload);
+                if(res.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('newBidModal')).hide();
+                    document.getElementById('bidForm').reset();
+                    fetchInventoryStore();
+                } else { alert("Operational pipeline error mounting bid item entry."); }
+            } catch(ex) { alert("Execution crash communicating upstream database transaction."); }
+        });
 
-        function refreshVisualMetrics() {
-            const total = trackedBids.length;
-            const tech = trackedBids.filter(b => b.currentPhase.includes("Technical")).length;
-            const fin = trackedBids.filter(b => b.currentPhase.includes("Financial")).length;
-            const closed = trackedBids.filter(b => b.currentPhase.includes("Finalized")).length;
+        function filterInventoryTable() {
+            const q = document.getElementById('srcQuery').value.toLowerCase();
+            const s = document.getElementById('fltStatus').value;
+            const ev = document.getElementById('srcEvaluator').value.toLowerCase();
 
-            document.getElementById('cntAll').innerText = total;
-            document.getElementById('cntTech').innerText = tech;
-            document.getElementById('cntFin').innerText = fin;
-
-            if(chrtDist) {
-                chrtDist.data.datasets[0].data = [tech, fin, closed];
-                chrtDist.update();
-            }
-            if(chrtTrend) {
-                chrtTrend.data.datasets[0].data = [total, total + 1, total * 1.5];
-                chrtTrend.update();
-            }
-        }
-
-        function setupCharts() {
-            chrtTrend = new Chart(document.getElementById('trendChart'), {
-                type: 'line',
-                data: { labels: ['Phase Target A', 'Phase Target B', 'Current Sync Run'], datasets: [{ data: [0,0,0], borderColor: '#6366f1', borderWidth: 2, tension: 0.1, fill: false }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
+            const match = fullBidsCache.filter(item => {
+                const txtMatch = item.bid_id.toLowerCase().includes(q) || item.bid_number.toLowerCase().includes(q) || item.project_name.toLowerCase().includes(q);
+                const statMatch = s === "" ? true : item.status === s;
+                const evalMatch = ev === "" ? true : item.assigned_evaluator.toLowerCase().includes(ev);
+                return txtMatch && statMatch && evalMatch;
             });
-
-            chrtDist = new Chart(document.getElementById('distributionChart'), {
-                type: 'bar',
-                data: { labels: ['Technical Phase', 'Financial Phase', 'Finalized'], datasets: [{ data: [0,0,0], backgroundColor: ['#f59e0b', '#818cf8', '#10b981'], borderRadius: 6 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
-            });
+            renderTable(match);
         }
 
-        function executeWebhook(payload, actionTag) {
-            // Point this to your published Google Apps Script Web App macro
-            const WEBHOOK_TARGET_URL = "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec";
-            
-            console.log(`[Pushing State via Fetch API] Action: ${actionTag}`, payload);
-
-            fetch(WEBHOOK_TARGET_URL, {
-                method: "POST",
-                mode: "no-cors",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ action: actionTag, data: payload, operator: sessionRole })
-            })
-            .catch(err => console.log("Stream network delay logged. Retrying standard buffer payload loop."));
-        }
-
-        function mockExport(formatName) {
-            alert(`Compilation Complete!\nExport target format pipeline run: ${formatName}\nData state snapshot generated cleanly across all active milestone rows.`);
+        function resetFilters() {
+            document.getElementById('srcQuery').value = "";
+            document.getElementById('fltStatus').value = "";
+            document.getElementById('srcEvaluator').value = "";
+            renderTable(fullBidsCache);
         }
     </script>
 </body>
