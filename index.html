@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bid Evaluation Portal</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+<h1>Bid Evaluation Tracking Portal</h1>
+</header>
+
+<div class="container">
+<div class="card">
+<h2>Register New Bid</h2>
+<input id="bidNo" placeholder="Bid Number">
+<input id="projectName" placeholder="Project Name">
+<button onclick="addBid()">Create Bid</button>
+</div>
+
+<div class="card">
+<h2>Dashboard</h2>
+<div id="stats"></div>
+</div>
+
+<div class="card">
+<h2>Bid Records</h2>
+<table id="tbl">
+<thead><tr><th>Bid No</th><th>Project</th><th>Status</th></tr></thead>
+<tbody></tbody>
+</table>
+</div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
