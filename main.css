@@ -1,0 +1,35 @@
+/* Responsive Structural Blueprint */
+:root {
+  --sidebar-w: 260px;
+  --primary: #1a73e8;
+  --primary-dark: #0d47a1;
+  --gray-100: #f5f5f5;
+  --gray-200: #eeeeee;
+  --gray-900: #212121;
+}
+* { margin:0; padding:0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; background: var(--gray-100); min-height: 100vh; overflow-x: hidden; }
+
+/* Navigation Layering */
+.sidebar {
+  position: fixed; left: 0; top: 0; width: var(--sidebar-w); height: 100vh;
+  background: linear-gradient(180deg, var(--primary-dark) 0%, var(--primary) 100%);
+  color: white; padding: 20px 0; z-index: 1010; transition: transform 0.3s ease;
+}
+.main-content { margin-left: var(--sidebar-w); min-height: 100vh; transition: margin 0.3s ease; }
+
+/* Global Grid and Table Wrappers */
+.responsive-table-holder { width: 100%; overflow-x: auto; background: white; border-radius: 12px; border: 1px solid var(--gray-200); margin-top: 16px; }
+table { width: 100%; border-collapse: collapse; text-align: left; min-width: 600px; }
+
+/* Desktop-First Hidden Mobile Elements */
+.mobile-topbar { display: none; background: white; padding: 12px 20px; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--gray-200); position: sticky; top:0; z-index: 1005; }
+.menu-toggle { background: none; border: none; cursor: pointer; color: var(--gray-900); }
+
+/* Core Layout Responsiveness */
+@media (max-width: 991px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.active { transform: translateX(0); }
+  .main-content { margin-left: 0; }
+  .mobile-topbar { display: flex; }
+}
