@@ -1,0 +1,1576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bid Evaluation Portal - Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --primary: #1a73e8;
+      --primary-dark: #0d47a1;
+      --success: #34a853;
+      --warning: #fbbc04;
+      --danger: #ea4335;
+      --purple: #673ab7;
+      --gray-50: #fafafa;
+      --gray-100: #f5f5f5;
+      --gray-200: #eeeeee;
+      --gray-300: #e0e0e0;
+      --gray-500: #9e9e9e;
+      --gray-700: #616161;
+      --gray-900: #212121;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--gray-100);
+      min-height: 100vh;
+    }
+    
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 260px;
+      height: 100vh;
+      background: linear-gradient(180deg, var(--primary-dark) 0%, var(--primary) 100%);
+      color: white;
+      padding: 20px 0;
+      z-index: 1000;
+      transition: transform 0.3s ease;
+    }
+    
+    .sidebar-header {
+      padding: 0 20px 30px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 20px;
+    }
+    
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .sidebar-logo .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: white;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .sidebar-logo .logo-icon .material-icons {
+      color: var(--primary);
+      font-size: 24px;
+    }
+    
+    .sidebar-logo h1 {
+      font-size: 18px;
+      font-weight: 600;
+    }
+    
+    .sidebar-logo span {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+    
+    .nav-menu {
+      list-style: none;
+    }
+    
+    .nav-item {
+      margin: 4px 12px;
+    }
+    
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      color: rgba(255,255,255,0.85);
+      text-decoration: none;
+      border-radius: 10px;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    
+    .nav-link:hover {
+      background: rgba(255,255,255,0.1);
+      color: white;
+    }
+    
+    .nav-link.active {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      font-weight: 500;
+    }
+    
+    .nav-link .material-icons {
+      font-size: 22px;
+    }
+    
+    .nav-section {
+      padding: 20px 20px 10px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.6;
+    }
+    
+    /* Main Content */
+    .main-content {
+      margin-left: 260px;
+      min-height: 100vh;
+    }
+    
+    /* Top Header */
+    .top-header {
+      background: white;
+      padding: 16px 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--gray-200);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .page-title h2 {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--gray-900);
+    }
+    
+    .page-title p {
+      font-size: 13px;
+      color: var(--gray-500);
+      margin-top: 2px;
+    }
+    
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 16px;
+      background: var(--gray-50);
+      border-radius: 25px;
+      cursor: pointer;
+    }
+    
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    
+    .user-info {
+      text-align: left;
+    }
+    
+    .user-info .name {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--gray-900);
+    }
+    
+    .user-info .role {
+      font-size: 12px;
+      color: var(--gray-500);
+    }
+    
+    .logout-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: none;
+      border: 1px solid var(--gray-300);
+      border-radius: 8px;
+      color: var(--gray-700);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .logout-btn:hover {
+      background: var(--danger);
+      border-color: var(--danger);
+      color: white;
+    }
+    
+    /* Dashboard Content */
+    .dashboard-content {
+      padding: 30px;
+    }
+    
+    /* Stats Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .stat-card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+    
+    .stat-info h3 {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--gray-500);
+      margin-bottom: 8px;
+    }
+    
+    .stat-info .value {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--gray-900);
+    }
+    
+    .stat-info .change {
+      font-size: 12px;
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .stat-info .change.positive {
+      color: var(--success);
+    }
+    
+    .stat-info .change.negative {
+      color: var(--danger);
+    }
+    
+    .stat-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .stat-icon .material-icons {
+      font-size: 28px;
+      color: white;
+    }
+    
+    .stat-icon.blue { background: linear-gradient(135deg, #1a73e8, #4285f4); }
+    .stat-icon.green { background: linear-gradient(135deg, #34a853, #66bb6a); }
+    .stat-icon.yellow { background: linear-gradient(135deg, #fbbc04, #ffd54f); }
+    .stat-icon.red { background: linear-gradient(135deg, #ea4335, #ff7043); }
+    .stat-icon.purple { background: linear-gradient(135deg, #673ab7, #9575cd); }
+    
+    /* Charts Section */
+    .charts-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .chart-card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    
+    .chart-card h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--gray-900);
+      margin-bottom: 20px;
+    }
+    
+    .chart-container {
+      height: 250px;
+      position: relative;
+    }
+    
+    /* Phase Progress */
+    .phase-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .phase-card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    
+    .phase-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    
+    .phase-header h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--gray-900);
+    }
+    
+    .phase-badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    
+    .phase-badge.technical { background: #e3f2fd; color: #1565c0; }
+    .phase-badge.financial { background: #fff3e0; color: #e65100; }
+    
+    .phase-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    
+    .phase-stat {
+      text-align: center;
+      padding: 16px 8px;
+      background: var(--gray-50);
+      border-radius: 10px;
+    }
+    
+    .phase-stat .number {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--gray-900);
+    }
+    
+    .phase-stat .label {
+      font-size: 11px;
+      color: var(--gray-500);
+      margin-top: 4px;
+    }
+    
+    .phase-stat.pending .number { color: var(--gray-700); }
+    .phase-stat.in-progress .number { color: var(--primary); }
+    .phase-stat.completed .number { color: var(--success); }
+    .phase-stat.delayed .number { color: var(--danger); }
+    
+    /* Bids Table */
+    .table-section {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      margin-bottom: 30px;
+    }
+    
+    .table-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    
+    .table-header h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--gray-900);
+    }
+    
+    .table-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .search-box {
+      position: relative;
+    }
+    
+    .search-box input {
+      padding: 10px 16px 10px 40px;
+      border: 1px solid var(--gray-300);
+      border-radius: 8px;
+      font-size: 14px;
+      width: 250px;
+      transition: all 0.2s;
+    }
+    
+    .search-box input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+    }
+    
+    .search-box .material-icons {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gray-500);
+      font-size: 20px;
+    }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+    
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .data-table th {
+      text-align: left;
+      padding: 12px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--gray-500);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 2px solid var(--gray-200);
+    }
+    
+    .data-table td {
+      padding: 16px;
+      font-size: 14px;
+      color: var(--gray-700);
+      border-bottom: 1px solid var(--gray-200);
+    }
+    
+    .data-table tr:hover {
+      background: var(--gray-50);
+    }
+    
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    
+    .status-badge.pending { background: #f5f5f5; color: #616161; }
+    .status-badge.in-progress { background: #e3f2fd; color: #1565c0; }
+    .status-badge.completed { background: #e8f5e9; color: #2e7d32; }
+    .status-badge.delayed { background: #ffebee; color: #c62828; }
+    
+    .status-badge .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    
+    .action-btn {
+      padding: 6px 10px;
+      background: none;
+      border: 1px solid var(--gray-300);
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--gray-700);
+      transition: all 0.2s;
+    }
+    
+    .action-btn:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+    
+    /* Upcoming Deadlines */
+    .deadlines-section {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    
+    .deadline-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    
+    .deadline-item:last-child {
+      border-bottom: none;
+    }
+    
+    .deadline-date {
+      text-align: center;
+      padding: 12px 16px;
+      background: var(--gray-50);
+      border-radius: 10px;
+      min-width: 70px;
+    }
+    
+    .deadline-date .day {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    
+    .deadline-date .month {
+      font-size: 11px;
+      color: var(--gray-500);
+      text-transform: uppercase;
+    }
+    
+    .deadline-info h4 {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--gray-900);
+      margin-bottom: 4px;
+    }
+    
+    .deadline-info p {
+      font-size: 12px;
+      color: var(--gray-500);
+    }
+    
+    .deadline-urgent {
+      background: #ffebee;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-size: 11px;
+      color: var(--danger);
+      font-weight: 500;
+    }
+    
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+    
+    .modal-overlay.show {
+      display: flex;
+    }
+    
+    .modal {
+      background: white;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow: auto;
+    }
+    
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--gray-200);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .modal-header h3 {
+      font-size: 18px;
+      font-weight: 600;
+    }
+    
+    .modal-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--gray-500);
+      padding: 4px;
+    }
+    
+    .modal-body {
+      padding: 24px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--gray-700);
+      margin-bottom: 8px;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--gray-300);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+    }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--gray-200);
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+    
+    .btn-secondary {
+      background: var(--gray-100);
+      color: var(--gray-700);
+    }
+    
+    .btn-secondary:hover {
+      background: var(--gray-200);
+    }
+    
+    /* Loading */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255,255,255,0.9);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 3000;
+    }
+    
+    .loading-overlay.hidden {
+      display: none;
+    }
+    
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid var(--gray-200);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .loading-text {
+      margin-top: 16px;
+      color: var(--gray-700);
+      font-size: 14px;
+    }
+    
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .charts-section,
+      .phase-section {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      
+      .main-content {
+        margin-left: 0;
+      }
+      
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <p class="loading-text">Loading dashboard...</p>
+  </div>
+  
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="logo-icon">
+          <span class="material-icons">gavel</span>
+        </div>
+        <div>
+          <h1>Bid Portal</h1>
+          <span>Evaluation System</span>
+        </div>
+      </div>
+    </div>
+    
+    <nav>
+      <ul class="nav-menu">
+        <li class="nav-section">Main</li>
+        <li class="nav-item">
+          <a class="nav-link active" onclick="showPage('dashboard')">
+            <span class="material-icons">dashboard</span>
+            Dashboard
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" onclick="showPage('bids')">
+            <span class="material-icons">folder_open</span>
+            Bid Management
+          </a>
+        </li>
+        
+        <li class="nav-section">Evaluation</li>
+        <li class="nav-item">
+          <a class="nav-link" onclick="showPage('technical')">
+            <span class="material-icons">engineering</span>
+            Technical Evaluation
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" onclick="showPage('financial')">
+            <span class="material-icons">payments</span>
+            Financial Evaluation
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" onclick="showPage('clarifications')">
+            <span class="material-icons">question_answer</span>
+            Clarifications
+          </a>
+        </li>
+        
+        <li class="nav-section">Reports</li>
+        <li class="nav-item">
+          <a class="nav-link" onclick="showPage('reports')">
+            <span class="material-icons">assessment</span>
+            Reports & Analytics
+          </a>
+        </li>
+        
+        <li class="nav-section" id="adminSection" style="display: none;">Administration</li>
+        <li class="nav-item" id="userManagementNav" style="display: none;">
+          <a class="nav-link" onclick="showPage('users')">
+            <span class="material-icons">manage_accounts</span>
+            User Management
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </aside>
+  
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Top Header -->
+    <header class="top-header">
+      <div class="page-title">
+        <h2 id="pageTitle">Dashboard</h2>
+        <p id="pageSubtitle">Overview of bid evaluation activities</p>
+      </div>
+      <div class="header-actions">
+        <div class="user-profile">
+          <div class="user-avatar" id="userAvatar">AD</div>
+          <div class="user-info">
+            <div class="name" id="userName">Admin User</div>
+            <div class="role" id="userRole">Administrator</div>
+          </div>
+        </div>
+        <button class="logout-btn" onclick="logout()">
+          <span class="material-icons">logout</span>
+          Logout
+        </button>
+      </div>
+    </header>
+    
+    <!-- Dashboard Content -->
+    <div class="dashboard-content" id="dashboardPage">
+      <!-- Stats Cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-info">
+            <h3>Total Bids</h3>
+            <div class="value" id="totalBids">0</div>
+            <div class="change positive">
+              <span class="material-icons">trending_up</span>
+              Active evaluations
+            </div>
+          </div>
+          <div class="stat-icon blue">
+            <span class="material-icons">folder_open</span>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-info">
+            <h3>Pending Review</h3>
+            <div class="value" id="pendingBids">0</div>
+            <div class="change">
+              <span class="material-icons">schedule</span>
+              Awaiting action
+            </div>
+          </div>
+          <div class="stat-icon yellow">
+            <span class="material-icons">pending_action</span>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-info">
+            <h3>Completed</h3>
+            <div class="value" id="completedBids">0</div>
+            <div class="change positive">
+              <span class="material-icons">check_circle</span>
+              Successfully evaluated
+            </div>
+          </div>
+          <div class="stat-icon green">
+            <span class="material-icons">task_alt</span>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-info">
+            <h3>Delayed</h3>
+            <div class="value" id="delayedBids">0</div>
+            <div class="change negative">
+              <span class="material-icons">warning</span>
+              Requires attention
+            </div>
+          </div>
+          <div class="stat-icon red">
+            <span class="material-icons">error</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Charts Section -->
+      <div class="charts-section">
+        <div class="chart-card">
+          <h3>PAC Distribution</h3>
+          <div class="chart-container">
+            <canvas id="pacChart"></canvas>
+          </div>
+        </div>
+        
+        <div class="chart-card">
+          <h3>Purchase Methods</h3>
+          <div class="chart-container">
+            <canvas id="purchaseMethodChart"></canvas>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Phase Progress -->
+      <div class="phase-section">
+        <div class="phase-card">
+          <div class="phase-header">
+            <h3>Technical Evaluation Phase</h3>
+            <span class="phase-badge technical">Technical</span>
+          </div>
+          <div class="phase-stats">
+            <div class="phase-stat pending">
+              <div class="number" id="techPending">0</div>
+              <div class="label">Pending</div>
+            </div>
+            <div class="phase-stat in-progress">
+              <div class="number" id="techInProgress">0</div>
+              <div class="label">In Progress</div>
+            </div>
+            <div class="phase-stat completed">
+              <div class="number" id="techCompleted">0</div>
+              <div class="label">Completed</div>
+            </div>
+            <div class="phase-stat delayed">
+              <div class="number" id="techDelayed">0</div>
+              <div class="label">Delayed</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="phase-card">
+          <div class="phase-header">
+            <h3>Financial Evaluation Phase</h3>
+            <span class="phase-badge financial">Financial</span>
+          </div>
+          <div class="phase-stats">
+            <div class="phase-stat pending">
+              <div class="number" id="finPending">0</div>
+              <div class="label">Pending</div>
+            </div>
+            <div class="phase-stat in-progress">
+              <div class="number" id="finInProgress">0</div>
+              <div class="label">In Progress</div>
+            </div>
+            <div class="phase-stat completed">
+              <div class="number" id="finCompleted">0</div>
+              <div class="label">Completed</div>
+            </div>
+            <div class="phase-stat delayed">
+              <div class="number" id="finDelayed">0</div>
+              <div class="label">Delayed</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Recent Bids Table -->
+      <div class="table-section">
+        <div class="table-header">
+          <h3>Recent Bids</h3>
+          <div class="table-actions">
+            <div class="search-box">
+              <span class="material-icons">search</span>
+              <input type="text" placeholder="Search bids..." id="searchInput" oninput="filterBids()">
+            </div>
+            <button class="btn btn-primary" onclick="openNewBidModal()">
+              <span class="material-icons">add</span>
+              New Bid
+            </button>
+          </div>
+        </div>
+        
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Bid Number</th>
+              <th>Bid Name</th>
+              <th>PAC</th>
+              <th>Purchase Method</th>
+              <th>Status</th>
+              <th>Tech Status</th>
+              <th>Fin Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="bidsTableBody">
+            <!-- Data will be loaded here -->
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Upcoming Deadlines -->
+      <div class="deadlines-section">
+        <h3 style="margin-bottom: 20px; font-size: 16px; font-weight: 600;">Upcoming Deadlines (Next 3 Days)</h3>
+        <div id="deadlinesContainer">
+          <!-- Deadlines will be loaded here -->
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <!-- New Bid Modal -->
+  <div class="modal-overlay" id="newBidModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Register New Bid</h3>
+        <button class="modal-close" onclick="closeModal('newBidModal')">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="newBidForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="bidNumber">Bid Number *</label>
+              <input type="text" id="bidNumber" required placeholder="e.g., BID-2024-001">
+            </div>
+            <div class="form-group">
+              <label for="pac">Purchase Approving Committee *</label>
+              <select id="pac" required>
+                <option value="">Select PAC</option>
+                <option value="PAC ONE">PAC ONE</option>
+                <option value="PAC TWO">PAC TWO</option>
+                <option value="PAC THREE">PAC THREE</option>
+                <option value="PAC FOUR">PAC FOUR</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="bidName">Bid Name *</label>
+            <input type="text" id="bidName" required placeholder="Enter bid name/description">
+          </div>
+          
+          <div class="form-group">
+            <label for="purchaseMethod">Purchase Method *</label>
+            <select id="purchaseMethod" required>
+              <option value="">Select Purchase Method</option>
+              <option value="Open Bid">Open Bid</option>
+              <option value="Direct Purchase">Direct Purchase</option>
+              <option value="Proforma">Proforma</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('newBidModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="submitNewBid()">Create Bid</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- View Bid Modal -->
+  <div class="modal-overlay" id="viewBidModal">
+    <div class="modal" style="max-width: 800px;">
+      <div class="modal-header">
+        <h3>Bid Details</h3>
+        <button class="modal-close" onclick="closeModal('viewBidModal')">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+      <div class="modal-body" id="viewBidContent">
+        <!-- Bid details will be loaded here -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('viewBidModal')">Close</button>
+        <button class="btn btn-primary" onclick="generateReport(currentViewingBid)">
+          <span class="material-icons">picture_as_pdf</span>
+          Generate Report
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Global variables
+    let currentUser = null;
+    let allBids = [];
+    let currentViewingBid = null;
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      // Get current user from session
+      currentUser = JSON.parse(sessionStorage.getItem('bidPortalUser') || '{}');
+      
+      if (!currentUser.id) {
+        // Redirect to login
+        google.script.run
+          .withSuccessHandler(function(html) {
+            document.open();
+            document.write(html);
+            document.close();
+          })
+          .getLoginPage();
+        return;
+      }
+      
+      // Update user info in header
+      document.getElementById('userName').textContent = currentUser.fullName || currentUser.username;
+      document.getElementById('userRole').textContent = currentUser.role;
+      document.getElementById('userAvatar').textContent = getInitials(currentUser.fullName || currentUser.username);
+      
+      // Show admin section if user is admin
+      if (currentUser.role === 'Admin') {
+        document.getElementById('adminSection').style.display = 'block';
+        document.getElementById('userManagementNav').style.display = 'block';
+      }
+      
+      // Load dashboard data
+      loadDashboardData();
+    });
+    
+    // Helper functions
+    function getInitials(name) {
+      return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+    }
+    
+    function showLoading() {
+      document.getElementById('loadingOverlay').classList.remove('hidden');
+    }
+    
+    function hideLoading() {
+      document.getElementById('loadingOverlay').classList.add('hidden');
+    }
+    
+    function loadDashboardData() {
+      showLoading();
+      
+      // Get dashboard stats
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result.success) {
+            updateStats(result.stats);
+          }
+          hideLoading();
+        })
+        .withFailureHandler(function(error) {
+          console.error('Error loading dashboard:', error);
+          hideLoading();
+        })
+        .getDashboardStats();
+      
+      // Get all bids
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result.success) {
+            allBids = result.bids;
+            renderBidsTable(allBids);
+          }
+        })
+        .getAllBids({});
+    }
+    
+    function updateStats(stats) {
+      // Update stat cards
+      document.getElementById('totalBids').textContent = stats.totalBids;
+      document.getElementById('pendingBids').textContent = stats.pendingBids;
+      document.getElementById('completedBids').textContent = stats.completedBids;
+      document.getElementById('delayedBids').textContent = stats.delayedBids;
+      
+      // Update phase stats
+      document.getElementById('techPending').textContent = stats.technicalPhase.pending;
+      document.getElementById('techInProgress').textContent = stats.technicalPhase.inProgress;
+      document.getElementById('techCompleted').textContent = stats.technicalPhase.completed;
+      document.getElementById('techDelayed').textContent = stats.technicalPhase.delayed;
+      
+      document.getElementById('finPending').textContent = stats.financialPhase.pending;
+      document.getElementById('finInProgress').textContent = stats.financialPhase.inProgress;
+      document.getElementById('finCompleted').textContent = stats.financialPhase.completed;
+      document.getElementById('finDelayed').textContent = stats.financialPhase.delayed;
+      
+      // Render charts
+      renderPacChart(stats.pacDistribution);
+      renderPurchaseMethodChart(stats.purchaseMethodDistribution);
+      
+      // Render upcoming deadlines
+      renderDeadlines(stats.upcomingDeadlines);
+    }
+    
+    function renderPacChart(data) {
+      const ctx = document.getElementById('pacChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(data),
+          datasets: [{
+            data: Object.values(data),
+            backgroundColor: ['#1a73e8', '#34a853', '#fbbc04', '#ea4335'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                padding: 20,
+                usePointStyle: true
+              }
+            }
+          }
+        }
+      });
+    }
+    
+    function renderPurchaseMethodChart(data) {
+      const ctx = document.getElementById('purchaseMethodChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: Object.keys(data),
+          datasets: [{
+            data: Object.values(data),
+            backgroundColor: ['#1a73e8', '#673ab7', '#00acc1'],
+            borderRadius: 8,
+            barThickness: 40
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                stepSize: 1
+              }
+            }
+          }
+        }
+      });
+    }
+    
+    function renderDeadlines(deadlines) {
+      const container = document.getElementById('deadlinesContainer');
+      
+      if (deadlines.length === 0) {
+        container.innerHTML = '<p style="color: var(--gray-500); text-align: center; padding: 20px;">No upcoming deadlines in the next 3 days</p>';
+        return;
+      }
+      
+      container.innerHTML = deadlines.map(deadline => {
+        const date = new Date(deadline.targetDate);
+        const day = date.getDate();
+        const month = date.toLocaleString('default', { month: 'short' });
+        
+        return `
+          <div class="deadline-item">
+            <div class="deadline-date">
+              <div class="day">${day}</div>
+              <div class="month">${month}</div>
+            </div>
+            <div class="deadline-info">
+              <h4>${deadline.activity}</h4>
+              <p>Bid ID: ${deadline.bidId} | Phase: ${deadline.phase}</p>
+            </div>
+            <span class="deadline-urgent">Upcoming</span>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    function renderBidsTable(bids) {
+      const tbody = document.getElementById('bidsTableBody');
+      
+      if (bids.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px; color: var(--gray-500);">No bids found. Click "New Bid" to create one.</td></tr>';
+        return;
+      }
+      
+      tbody.innerHTML = bids.map(bid => `
+        <tr>
+          <td><strong>${bid.bidNumber}</strong></td>
+          <td>${bid.bidName}</td>
+          <td>${bid.pac}</td>
+          <td>${bid.purchaseMethod}</td>
+          <td><span class="status-badge ${bid.status.toLowerCase().replace(' ', '-')}"><span class="dot"></span>${bid.status}</span></td>
+          <td><span class="status-badge ${bid.technicalStatus.toLowerCase().replace(' ', '-')}"><span class="dot"></span>${bid.technicalStatus}</span></td>
+          <td><span class="status-badge ${bid.financialStatus.toLowerCase().replace(' ', '-')}"><span class="dot"></span>${bid.financialStatus}</span></td>
+          <td>
+            <button class="action-btn" onclick="viewBid('${bid.id}')" title="View Details">
+              <span class="material-icons" style="font-size: 18px;">visibility</span>
+            </button>
+            <button class="action-btn" onclick="trackProgress('${bid.id}')" title="Track Progress">
+              <span class="material-icons" style="font-size: 18px;">timeline</span>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+    
+    function filterBids() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = allBids.filter(bid => 
+        bid.bidNumber.toLowerCase().includes(search) ||
+        bid.bidName.toLowerCase().includes(search) ||
+        bid.pac.toLowerCase().includes(search)
+      );
+      renderBidsTable(filtered);
+    }
+    
+    // Modal functions
+    function openNewBidModal() {
+      document.getElementById('newBidModal').classList.add('show');
+    }
+    
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('show');
+    }
+    
+    function submitNewBid() {
+      const bidData = {
+        bidNumber: document.getElementById('bidNumber').value,
+        bidName: document.getElementById('bidName').value,
+        pac: document.getElementById('pac').value,
+        purchaseMethod: document.getElementById('purchaseMethod').value
+      };
+      
+      if (!bidData.bidNumber || !bidData.bidName || !bidData.pac || !bidData.purchaseMethod) {
+        alert('Please fill in all required fields');
+        return;
+      }
+      
+      showLoading();
+      
+      google.script.run
+        .withSuccessHandler(function(result) {
+          hideLoading();
+          if (result.success) {
+            closeModal('newBidModal');
+            document.getElementById('newBidForm').reset();
+            loadDashboardData();
+            alert('Bid created successfully!');
+          } else {
+            alert(result.message);
+          }
+        })
+        .withFailureHandler(function(error) {
+          hideLoading();
+          alert('Error creating bid: ' + error.message);
+        })
+        .createBid(bidData, currentUser);
+    }
+    
+    function viewBid(bidId) {
+      currentViewingBid = bidId;
+      showLoading();
+      
+      google.script.run
+        .withSuccessHandler(function(result) {
+          hideLoading();
+          if (result.success) {
+            renderBidDetails(result.bid);
+            document.getElementById('viewBidModal').classList.add('show');
+          } else {
+            alert(result.message);
+          }
+        })
+        .withFailureHandler(function(error) {
+          hideLoading();
+          alert('Error loading bid details: ' + error.message);
+        })
+        .getBidById(bidId);
+    }
+    
+    function renderBidDetails(bid) {
+      const content = document.getElementById('viewBidContent');
+      
+      // Render activities
+      const techActivities = bid.activities.filter(a => a.phase === 'Technical');
+      const finActivities = bid.activities.filter(a => a.phase === 'Financial');
+      
+      content.innerHTML = `
+        <div style="margin-bottom: 24px;">
+          <h4 style="font-size: 14px; color: var(--gray-500); margin-bottom: 8px;">Bid Information</h4>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div>
+              <p style="font-size: 12px; color: var(--gray-500);">Bid Number</p>
+              <p style="font-weight: 600;">${bid.bidNumber}</p>
+            </div>
+            <div>
+              <p style="font-size: 12px; color: var(--gray-500);">Bid Name</p>
+              <p style="font-weight: 600;">${bid.bidName}</p>
+            </div>
+            <div>
+              <p style="font-size: 12px; color: var(--gray-500);">PAC</p>
+              <p style="font-weight: 600;">${bid.pac}</p>
+            </div>
+            <div>
+              <p style="font-size: 12px; color: var(--gray-500);">Purchase Method</p>
+              <p style="font-weight: 600;">${bid.purchaseMethod}</p>
+            </div>
+          </div>
+        </div>
+        
+        <div style="margin-bottom: 24px;">
+          <h4 style="font-size: 14px; color: var(--gray-500); margin-bottom: 12px;">Technical Evaluation Activities</h4>
+          <table class="data-table" style="font-size: 13px;">
+            <thead>
+              <tr>
+                <th>Activity</th>
+                <th>Status</th>
+                <th>Target</th>
+                <th>Delayed</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${techActivities.map(a => `
+                <tr>
+                  <td>${a.activityName}</td>
+                  <td><span class="status-badge ${a.status.toLowerCase().replace(' ', '-')}">${a.status}</span></td>
+                  <td>${a.targetDate}</td>
+                  <td>${a.isDelayed ? '<span style="color: var(--danger);">Yes (' + a.delayDays + ' days)</span>' : 'No'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+        
+        <div style="margin-bottom: 24px;">
+          <h4 style="font-size: 14px; color: var(--gray-500); margin-bottom: 12px;">Financial Evaluation Activities</h4>
+          <table class="data-table" style="font-size: 13px;">
+            <thead>
+              <tr>
+                <th>Activity</th>
+                <th>Status</th>
+                <th>Target</th>
+                <th>Delayed</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${finActivities.map(a => `
+                <tr>
+                  <td>${a.activityName}</td>
+                  <td><span class="status-badge ${a.status.toLowerCase().replace(' ', '-')}">${a.status}</span></td>
+                  <td>${a.targetDate}</td>
+                  <td>${a.isDelayed ? '<span style="color: var(--danger);">Yes (' + a.delayDays + ' days)</span>' : 'No'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+        
+        ${bid.bidders.length > 0 ? `
+        <div style="margin-bottom: 24px;">
+          <h4 style="font-size: 14px; color: var(--gray-500); margin-bottom: 12px;">Registered Bidders</h4>
+          <table class="data-table" style="font-size: 13px;">
+            <thead>
+              <tr>
+                <th>Bidder Name</th>
+                <th>Technical Score</th>
+                <th>Status</th>
+                <th>Rank</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${bid.bidders.map(b => `
+                <tr>
+                  <td>${b.bidderName}</td>
+                  <td>${b.technicalScore}</td>
+                  <td>${b.technicalStatus}</td>
+                  <td><strong>#${b.rank}</strong></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+        ` : ''}
+      `;
+    }
+    
+    function generateReport(bidId) {
+      showLoading();
+      
+      google.script.run
+        .withSuccessHandler(function(result) {
+          hideLoading();
+          if (result.success) {
+            alert('Report generated successfully! Check your Google Drive folder "Bid Evaluation Reports"');
+            window.open(result.fileUrl, '_blank');
+          } else {
+            alert(result.message);
+          }
+        })
+        .withFailureHandler(function(error) {
+          hideLoading();
+          alert('Error generating report: ' + error.message);
+        })
+        .generatePDFReport(bidId);
+    }
+    
+    function trackProgress(bidId) {
+      // Store the bid ID and navigate to progress tracking
+      sessionStorage.setItem('trackBidId', bidId);
+      showPage('progress');
+    }
+    
+    function showPage(page) {
+      // This will be expanded to show different pages
+      // For now, just show an alert for pages not yet implemented
+      if (page === 'progress') {
+        // Load progress tracking page
+        google.script.run
+          .withSuccessHandler(function(html) {
+            document.open();
+            document.write(html);
+            document.close();
+          })
+          .getProgressPage();
+      } else if (page !== 'dashboard') {
+        alert('This page is coming soon! Feature: ' + page);
+      }
+    }
+    
+    function logout() {
+      sessionStorage.removeItem('bidPortalUser');
+      localStorage.removeItem('bidPortalUser');
+      
+      google.script.run
+        .withSuccessHandler(function(html) {
+          document.open();
+          document.write(html);
+          document.close();
+        })
+        .getLoginPage();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bid Evaluation Portal - Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 50%, #01579b 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .login-container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      width: 100%;
+      max-width: 420px;
+      overflow: hidden;
+      animation: slideUp 0.5s ease-out;
+    }
+    
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .login-header {
+      background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+      padding: 40px 30px;
+      text-align: center;
+      color: white;
+    }
+    
+    .login-header .logo {
+      width: 80px;
+      height: 80px;
+      background: white;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .login-header .logo .material-icons {
+      font-size: 40px;
+      color: #1a73e8;
+    }
+    
+    .login-header h1 {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    .login-header p {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    
+    .login-form {
+      padding: 40px 30px;
+    }
+    
+    .form-group {
+      margin-bottom: 24px;
+    }
+    
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: #37474f;
+      margin-bottom: 8px;
+    }
+    
+    .input-wrapper {
+      position: relative;
+    }
+    
+    .input-wrapper .material-icons {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #90a4ae;
+      font-size: 20px;
+      transition: color 0.3s;
+    }
+    
+    .input-wrapper input {
+      width: 100%;
+      padding: 14px 16px 14px 48px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 15px;
+      font-family: inherit;
+      transition: all 0.3s;
+      background: #fafafa;
+    }
+    
+    .input-wrapper input:focus {
+      outline: none;
+      border-color: #1a73e8;
+      background: white;
+      box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.1);
+    }
+    
+    .input-wrapper input:focus + .material-icons,
+    .input-wrapper:focus-within .material-icons {
+      color: #1a73e8;
+    }
+    
+    .remember-me {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    
+    .remember-me input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #1a73e8;
+      cursor: pointer;
+    }
+    
+    .remember-me label {
+      font-size: 14px;
+      color: #546e7a;
+      cursor: pointer;
+    }
+    
+    .login-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(26, 115, 232, 0.4);
+    }
+    
+    .login-btn:active {
+      transform: translateY(0);
+    }
+    
+    .login-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .login-btn .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid white;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .error-message {
+      background: #ffebee;
+      color: #c62828;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-bottom: 20px;
+      display: none;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .error-message.show {
+      display: flex;
+    }
+    
+    .error-message .material-icons {
+      font-size: 20px;
+    }
+    
+    .login-footer {
+      text-align: center;
+      padding: 20px 30px;
+      background: #fafafa;
+      border-top: 1px solid #eee;
+    }
+    
+    .login-footer p {
+      font-size: 13px;
+      color: #78909c;
+    }
+    
+    .demo-credentials {
+      background: #e3f2fd;
+      padding: 16px;
+      border-radius: 8px;
+      margin-top: 16px;
+    }
+    
+    .demo-credentials p {
+      font-size: 12px;
+      color: #1565c0;
+      margin-bottom: 4px;
+    }
+    
+    .demo-credentials strong {
+      color: #0d47a1;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-header">
+      <div class="logo">
+        <span class="material-icons">gavel</span>
+      </div>
+      <h1>Bid Evaluation Portal</h1>
+      <p>Activity Registration & Progress Tracking System</p>
+    </div>
+    
+    <form class="login-form" id="loginForm">
+      <div class="error-message" id="errorMessage">
+        <span class="material-icons">error</span>
+        <span id="errorText">Invalid username or password</span>
+      </div>
+      
+      <div class="form-group">
+        <label for="username">Username</label>
+        <div class="input-wrapper">
+          <input type="text" id="username" name="username" placeholder="Enter your username" required autocomplete="username">
+          <span class="material-icons">person</span>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="input-wrapper">
+          <input type="password" id="password" name="password" placeholder="Enter your password" required autocomplete="current-password">
+          <span class="material-icons">lock</span>
+        </div>
+      </div>
+      
+      <div class="remember-me">
+        <input type="checkbox" id="rememberMe" name="rememberMe">
+        <label for="rememberMe">Remember me</label>
+      </div>
+      
+      <button type="submit" class="login-btn" id="loginBtn">
+        <span class="btn-text">Sign In</span>
+        <span class="material-icons">arrow_forward</span>
+      </button>
+    </form>
+    
+    <div class="login-footer">
+      <p>Bid Evaluation Management System</p>
+      <div class="demo-credentials">
+        <p><strong>Demo Credentials:</strong></p>
+        <p>Username: <strong>admin</strong> | Password: <strong>admin123</strong></p>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Store user session
+    let currentUser = null;
+    
+    // Check for stored session
+    document.addEventListener('DOMContentLoaded', function() {
+      const storedUser = localStorage.getItem('bidPortalUser');
+      if (storedUser) {
+        currentUser = JSON.parse(storedUser);
+        redirectToDashboard();
+      }
+    });
+    
+    // Handle form submission
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const loginBtn = document.getElementById('loginBtn');
+      const errorMessage = document.getElementById('errorMessage');
+      
+      // Clear previous error
+      errorMessage.classList.remove('show');
+      
+      // Show loading state
+      loginBtn.disabled = true;
+      loginBtn.innerHTML = '<div class="spinner"></div> Signing in...';
+      
+      // Call server-side login function
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result.success) {
+            currentUser = result.user;
+            
+            // Store in localStorage if remember me is checked
+            if (document.getElementById('rememberMe').checked) {
+              localStorage.setItem('bidPortalUser', JSON.stringify(currentUser));
+            }
+            
+            // Store in session
+            sessionStorage.setItem('bidPortalUser', JSON.stringify(currentUser));
+            
+            // Redirect to dashboard
+            redirectToDashboard();
+          } else {
+            // Show error
+            document.getElementById('errorText').textContent = result.message;
+            errorMessage.classList.add('show');
+            
+            // Reset button
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = '<span class="btn-text">Sign In</span><span class="material-icons">arrow_forward</span>';
+          }
+        })
+        .withFailureHandler(function(error) {
+          document.getElementById('errorText').textContent = 'Connection error. Please try again.';
+          errorMessage.classList.add('show');
+          
+          loginBtn.disabled = false;
+          loginBtn.innerHTML = '<span class="btn-text">Sign In</span><span class="material-icons">arrow_forward</span>';
+        })
+        .login(username, password);
+    });
+    
+    function redirectToDashboard() {
+      // Load the dashboard page
+      google.script.run
+        .withSuccessHandler(function(html) {
+          document.open();
+          document.write(html);
+          document.close();
+        })
+        .getDashboardPage();
+    }
+  </script>
+</body>
+</html>
