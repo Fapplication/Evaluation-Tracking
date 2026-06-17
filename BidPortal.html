@@ -754,7 +754,7 @@ tr:hover td{background:var(--gray1)}
 // ════════════════════════════════════════════════════════
 //  CONFIG
 // ════════════════════════════════════════════════════════
-const SCRIPT_URL = localStorage.getItem('script_url') || 'YOUR_APPS_SCRIPT_URL_HERE';
+const SCRIPT_URL = localStorage.getItem('script_url') || 'https://script.google.com/macros/s/AKfycbzthHpRF1glFVmuMxoC-7210dIM_L547XSUXejubdKSl4XHifjrQOSXOgNbD4iv6-8Jzg/exec';
 
 // ── Demo data (used when SCRIPT_URL not configured) ──────
 const DEMO = {
@@ -852,7 +852,7 @@ async function doLogin() {
   err.style.display = 'none';
   if (!email||!pw) { showAuthErr(err,'Please enter email and password.'); return; }
 
-  if (SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+  if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbzthHpRF1glFVmuMxoC-7210dIM_L547XSUXejubdKSl4XHifjrQOSXOgNbD4iv6-8Jzg/exec') {
     // Demo login
     if (email === 'admin@bid.gov' && pw === 'admin123') {
       SESSION = { token:'demo', user:{ id:'USR001', name:'Demo Admin', email, role:'admin' }};
@@ -884,7 +884,7 @@ async function doRegister() {
   if (!name||!email||!pw) { showAuthErr(err,'All fields are required.'); return; }
   if (pw.length < 6)      { showAuthErr(err,'Password must be at least 6 characters.'); return; }
 
-  if (SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+  if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbzthHpRF1glFVmuMxoC-7210dIM_L547XSUXejubdKSl4XHifjrQOSXOgNbD4iv6-8Jzg/exec') {
     showOkMsg(ok,`Demo mode: Account created for ${name}. Use admin@bid.gov / admin123 to login.`);
     return;
   }
@@ -935,7 +935,7 @@ function showPage(pageId, navEl) {
 // ════════════════════════════════════════════════════════
 async function loadDashboard() {
   let data;
-  if (SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+  if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbzthHpRF1glFVmuMxoC-7210dIM_L547XSUXejubdKSl4XHifjrQOSXOgNbD4iv6-8Jzg/exec') {
     // Build demo dashboard
     data = {
       success: true,
@@ -1015,7 +1015,7 @@ async function loadDashboard() {
 //  BIDS
 // ════════════════════════════════════════════════════════
 async function loadBids() {
-  if (SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+  if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbzthHpRF1glFVmuMxoC-7210dIM_L547XSUXejubdKSl4XHifjrQOSXOgNbD4iv6-8Jzg/exec') {
     BIDS = DEMO.bids; renderBidsTable(); return;
   }
   try {
@@ -1085,7 +1085,7 @@ async function openBidDetail(bidId) {
   document.getElementById('bid-detail-content').innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3)">Loading…</div>';
 
   let data;
-  if (SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+  if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbzthHpRF1glFVmuMxoC-7210dIM_L547XSUXejubdKSl4XHifjrQOSXOgNbD4iv6-8Jzg/exec') {
     const bid     = DEMO.bids.find(b => b.BidID === bidId) || {};
     const bidders = (DEMO.bidders[bidId]||[]).sort((a,b)=>b.TotalScore-a.TotalScore);
     const acts    = DEMO.activities[bidId]||[];
@@ -1333,7 +1333,7 @@ async function saveBid() {
     errEl.style.display = 'block'; return;
   }
 
-  if (SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+  if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbzthHpRF1glFVmuMxoC-7210dIM_L547XSUXejubdKSl4XHifjrQOSXOgNbD4iv6-8Jzg/exec') {
     if (!id) {
       // Demo: add to list
       const newBid = {
@@ -1371,7 +1371,7 @@ async function saveBid() {
 async function deleteBid(bidId) {
   if (!confirm('Delete this bid and all its data? This cannot be undone.')) return;
 
-  if (SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+  if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbzthHpRF1glFVmuMxoC-7210dIM_L547XSUXejubdKSl4XHifjrQOSXOgNbD4iv6-8Jzg/exec') {
     BIDS = BIDS.filter(b => b.BidID !== bidId);
     renderBidsTable(); showToast('Bid deleted.'); return;
   }
@@ -1421,7 +1421,7 @@ async function saveBidder() {
 
   const total = (parseFloat(tech)||0)*0.6 + (parseFloat(fin)||0)*0.4;
 
-  if (SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+  if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbzthHpRF1glFVmuMxoC-7210dIM_L547XSUXejubdKSl4XHifjrQOSXOgNbD4iv6-8Jzg/exec') {
     if (!DEMO.bidders[bidId]) DEMO.bidders[bidId] = [];
     DEMO.bidders[bidId].push({ BidderID:'BDR'+Date.now(), BidID:bidId, CompanyName:name,
       TechnicalScore:parseFloat(tech)||0, FinancialScore:parseFloat(fin)||0,
@@ -1447,7 +1447,7 @@ async function saveBidder() {
 
 async function removeBidder(bidderId, bidId) {
   if (!confirm('Remove this bidder?')) return;
-  if (SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+  if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbzthHpRF1glFVmuMxoC-7210dIM_L547XSUXejubdKSl4XHifjrQOSXOgNbD4iv6-8Jzg/exec') {
     if (DEMO.bidders[bidId]) DEMO.bidders[bidId] = DEMO.bidders[bidId].filter(b=>b.BidderID!==bidderId);
     const sec = document.getElementById(`bidders-section-${bidId}`);
     if (sec) sec.innerHTML = renderBiddersTable(DEMO.bidders[bidId]||[], bidId);
@@ -1491,7 +1491,7 @@ async function confirmActivityAction() {
   const action     = document.getElementById('act-form-action').value;
   const notes      = document.getElementById('act-form-notes').value;
 
-  if (SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+  if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbzthHpRF1glFVmuMxoC-7210dIM_L547XSUXejubdKSl4XHifjrQOSXOgNbD4iv6-8Jzg/exec') {
     // Demo: update local state
     const acts  = DEMO.activities[bidId] || [];
     const act   = acts.find(a => a.ActivityID === activityId);
@@ -1563,7 +1563,7 @@ async function saveClarification() {
 
   if (!subject||!date) { errEl.textContent='Subject and date are required.'; errEl.style.display='block'; return; }
 
-  if (SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+  if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbzthHpRF1glFVmuMxoC-7210dIM_L547XSUXejubdKSl4XHifjrQOSXOgNbD4iv6-8Jzg/exec') {
     const newClar = { ClarificationID:'CLR'+Date.now(), BidID:bidId, Subject:subject,
       RequestedDate:date, ResponseDate:respDate, Status:respDate?'resolved':'pending', Notes:notes };
     DEMO.clarifications.push(newClar);
@@ -1586,7 +1586,7 @@ async function saveClarification() {
 
 async function loadAllClarifications() {
   let clars;
-  if (SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+  if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbzthHpRF1glFVmuMxoC-7210dIM_L547XSUXejubdKSl4XHifjrQOSXOgNbD4iv6-8Jzg/exec') {
     clars = DEMO.clarifications;
   } else {
     try {
@@ -1615,7 +1615,7 @@ async function loadAllClarifications() {
 // ════════════════════════════════════════════════════════
 async function loadDelayReport() {
   let delayed;
-  if (SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+  if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbzthHpRF1glFVmuMxoC-7210dIM_L547XSUXejubdKSl4XHifjrQOSXOgNbD4iv6-8Jzg/exec') {
     delayed = [
       { bidNumber:'BID/2025/001', bidName:'Road Construction Materials Supply', pac:'PAC ONE',
         phase:'technical', activityName:'Technical Evaluation Progress',
