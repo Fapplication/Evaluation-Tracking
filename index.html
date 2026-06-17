@@ -836,40 +836,55 @@ function bootApp() {
 }
 
 // ════════════════════════════════════════════════════════
-//  AUTH
+//   AUTH ENGINE (PROD MODE)
 // ════════════════════════════════════════════════════════
+
 function switchAuthTab(tab) {
-  document.getElementById('auth-login').style.display    = tab==='login'    ? '' : 'none';
-  document.getElementById('auth-register').style.display = tab==='register' ? '' : 'none';
-  document.getElementById('tab-login').classList.toggle('active',    tab==='login');
-  document.getElementById('tab-register').classList.toggle('active', tab==='register');
+  document.getElementById('auth-login').style.display    = tab === 'login'    ? '' : 'none';
+  document.getElementById('auth-register').style.display = tab === 'register' ? '' : 'none';
+  document.getElementById('tab-login').classList.toggle('active',    tab === 'login');
+  document.getElementById('tab-register').classList.toggle('active', tab === 'register');
 }
 
 async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
   const pw    = document.getElementById('login-pw').value;
   const err   = document.getElementById('login-err');
+  const loginBtn = document.querySelector('#auth-login button[onclick="doLogin()"]');
+  
   err.style.display = 'none';
-  if (!email||!pw) { showAuthErr(err,'Please enter email and password.'); return; }
-
-  if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbzthHpRF1glFVmuMxoC-7210dIM_L547XSUXejubdKSl4XHifjrQOSXOgNbD4iv6-8Jzg/exec') {
-    // Demo login
-    if (email === 'admin@bid.gov' && pw === 'admin123') {
-      SESSION = { token:'demo', user:{ id:'USR001', name:'Demo Admin', email, role:'admin' }};
-      sessionStorage.setItem('bid_session', JSON.stringify(SESSION));
-      bootApp();
-    } else { showAuthErr(err,'Demo: admin@bid.gov / admin123'); }
-    return;
-  }
+  if (!email || !pw) { showAuthErr(err, 'Please enter email and password.'); return; }
 
   try {
-    const res  = await fetch(`${SCRIPT_URL}?action=login&email=${encodeURIComponent(email)}&pw=${encodeURIComponent(pw)}`);
+    // Enable visual loading state
+    if (loginBtn) { loginBtn.disabled = true; loginBtn.innerText = 'Signing In...'; }
+
+    // Use clean POST body payload configuration to keep credentials secure and private
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'login', email, pw })
+    });
+    
     const data = await res.json();
-    if (!data.success) { showAuthErr(err, data.error||'Login failed.'); return; }
-    SESSION = { token: data.token, user: data.user };
+    
+    if (!data.success) { 
+      showAuthErr(err, data.error || 'Invalid email or password.'); 
+      return; 
+    }
+    
+    // Save live session tokens straight into your local browser state
+    SESSION = { token: data.token || 'live_token', user: data.user };
     sessionStorage.setItem('bid_session', JSON.stringify(SESSION));
     bootApp();
-  } catch { showAuthErr(err,'Cannot reach server. Check your SCRIPT_URL.'); }
+    
+  } catch (error) {
+    console.error("Gateway Auth Exception:", error);
+    showAuthErr(err, 'Cannot connect to database. Ensure your Apps Script is deployed for "Anyone".');
+  } finally {
+    if (loginBtn) { loginBtn.disabled = false; loginBtn.innerText = 'Sign In →'; }
+  }
 }
 
 async function doRegister() {
@@ -879,24 +894,46 @@ async function doRegister() {
   const pw    = document.getElementById('reg-pw').value;
   const err   = document.getElementById('reg-err');
   const ok    = document.getElementById('reg-ok');
-  err.style.display = 'none'; ok.style.display = 'none';
+  const regBtn = document.querySelector('#auth-register button[onclick="doRegister()"]');
+  
+  err.style.display = 'none'; 
+  ok.style.display = 'none';
 
-  if (!name||!email||!pw) { showAuthErr(err,'All fields are required.'); return; }
-  if (pw.length < 6)      { showAuthErr(err,'Password must be at least 6 characters.'); return; }
-
-  if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbzthHpRF1glFVmuMxoC-7210dIM_L547XSUXejubdKSl4XHifjrQOSXOgNbD4iv6-8Jzg/exec') {
-    showOkMsg(ok,`Demo mode: Account created for ${name}. Use admin@bid.gov / admin123 to login.`);
-    return;
-  }
+  if (!name || !email || !pw) { showAuthErr(err, 'All fields are required.'); return; }
+  if (pw.length < 6)          { showAuthErr(err, 'Password must be at least 6 characters.'); return; }
 
   try {
-    const res  = await fetch(SCRIPT_URL, { method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ action:'register', name, email, role, pw }) });
+    if (regBtn) { regBtn.disabled = true; regBtn.innerText = 'Creating Account...'; }
+
+    const res = await fetch(SCRIPT_URL, { 
+      method: 'POST', 
+      mode: 'cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'register', name, email, role, pw }) 
+    });
+    
     const data = await res.json();
-    if (!data.success) { showAuthErr(err, data.error); return; }
-    showOkMsg(ok, data.message || 'Account created! You can now log in.');
-    setTimeout(() => switchAuthTab('login'), 2000);
-  } catch { showAuthErr(err,'Server error.'); }
+    
+    if (!data.success) { showAuthErr(err, data.error || 'Registration failed.'); return; }
+    
+    showOkMsg(ok, data.message || 'Account created! Switching to Login window...');
+    
+    // Auto clear forms
+    document.getElementById('reg-name').value = '';
+    document.getElementById('reg-email').value = '';
+    document.getElementById('reg-pw').value = '';
+    
+    setTimeout(() => {
+      switchAuthTab('login');
+      ok.style.display = 'none';
+    }, 2500);
+
+  } catch (error) {
+    console.error("Gateway Registration Exception:", error);
+    showAuthErr(err, 'Server validation error. Please try again.');
+  } finally {
+    if (regBtn) { regBtn.disabled = false; regBtn.innerText = 'Create Account'; }
+  }
 }
 
 function doLogout() {
@@ -904,10 +941,13 @@ function doLogout() {
   SESSION = null;
   document.getElementById('app').style.display = 'none';
   document.getElementById('auth-screen').style.display = 'flex';
+  
+  // Clean values out of old login fields for target device safety
+  if(document.getElementById('login-pw')) document.getElementById('login-pw').value = '';
 }
 
-function showAuthErr(el, msg) { el.textContent = msg; el.style.display = 'block'; }
-function showOkMsg(el, msg)   { el.textContent = msg; el.style.display = 'block'; }
+function showAuthErr(el, msg) { if(el) { el.textContent = msg; el.style.display = 'block'; } }
+function showOkMsg(el, msg)   { if(el) { el.textContent = msg; el.style.display = 'block'; } }
 
 // ════════════════════════════════════════════════════════
 //  NAVIGATION
