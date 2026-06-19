@@ -3,248 +3,713 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Bid Evaluation Portal — Register Bid</title>
-<script src="apps.js"></script>
+<title>Bid Evaluation Portal — Register Account</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  :root{--navy:#0D1B2A;--navy-mid:#1A2E45;--navy-card:#162032;--accent:#2196F3;--accent-dark:#1565C0;--gold:#FFC107;--white:#FFFFFF;--grey-300:#CBD5E1;--grey-500:#64748B;--danger:#EF4444;--success:#22C55E;--radius:10px;--radius-lg:16px;--sidebar-w:220px}
-  html,body{height:100%;font-family:'Inter',sans-serif;background:var(--navy);color:var(--white)}
-  .app{display:flex;height:100vh}
-  .sidebar{width:var(--sidebar-w);background:var(--navy-card);border-right:1px solid rgba(255,255,255,0.06);display:flex;flex-direction:column;flex-shrink:0}
-  .sidebar-logo{padding:16px 16px 14px;border-bottom:1px solid rgba(255,255,255,0.06)}
-  .logo-mark{display:flex;align-items:center;gap:9px;cursor:pointer}
-  .logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--accent-dark));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
-  .logo-text{font-size:13px;font-weight:700;line-height:1.2}
-  .logo-text span{display:block;font-size:10px;font-weight:400;color:var(--grey-500)}
-  .sidebar-nav{flex:1;padding:12px 8px;display:flex;flex-direction:column;gap:2px}
-  .nav-section-label{font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--grey-500);padding:10px 10px 5px}
-  .nav-item{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:8px;font-size:13px;font-weight:500;color:var(--grey-300);cursor:pointer;transition:all 0.15s;border:none;background:none;width:100%;text-align:left}
-  .nav-item:hover{background:rgba(255,255,255,0.05);color:var(--white)}
-  .nav-item.active{background:rgba(33,150,243,0.15);color:var(--accent)}
-  .nav-item .icon{font-size:15px;width:18px;text-align:center}
-  .sidebar-user{padding:12px 14px;border-top:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;gap:9px}
-  .user-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-dark));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
-  .user-info{flex:1;min-width:0}
-  .user-info strong{display:block;font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .user-info span{font-size:10px;color:var(--grey-500)}
-  .btn-logout{background:none;border:none;color:var(--grey-500);cursor:pointer;font-size:15px;padding:3px;transition:color 0.15s}
-  .btn-logout:hover{color:var(--danger)}
-  .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
-  .topbar{padding:12px 22px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;background:var(--navy-card);flex-shrink:0}
-  .topbar h1{font-size:16px;font-weight:700;flex:1}
-  .breadcrumb{font-size:11px;color:var(--grey-500)}
-  .breadcrumb a{color:var(--accent);cursor:pointer;text-decoration:none}
-  .content{flex:1;overflow-y:auto;padding:20px 28px}
-  .section-card{background:var(--navy-card);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius-lg);padding:20px 22px;margin-bottom:18px;max-width:960px}
-  .section-card-title{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:700;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.06);color:var(--grey-300)}
-  .fields-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  .fields-grid .span-2{grid-column:1/-1}
-  .form-group{display:flex;flex-direction:column;gap:5px}
-  .form-group label{font-size:11px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--grey-300)}
-  .form-group label .req{color:var(--danger);margin-left:2px}
-  .form-group input,.form-group select,.form-group textarea{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius);padding:9px 12px;font-size:13px;font-family:'Inter',sans-serif;color:var(--white);outline:none;transition:border-color 0.2s;width:100%}
-  .form-group select{cursor:pointer}
-  .form-group select option{background:var(--navy-mid)}
-  .form-group input::placeholder,.form-group textarea::placeholder{color:var(--grey-500)}
-  .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--accent);background:rgba(33,150,243,0.07)}
-  .form-group textarea{resize:vertical;min-height:64px}
-  .form-hint{font-size:11px;color:var(--grey-500)}
-  .bidder-table-wrap,.clarif-table-wrap{overflow-x:auto}
-  table{width:100%;border-collapse:collapse}
-  thead th{padding:9px 10px;text-align:left;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--grey-500);border-bottom:1px solid rgba(255,255,255,0.07)}
-  tbody tr{border-bottom:1px solid rgba(255,255,255,0.04)}
-  tbody tr:last-child{border-bottom:none}
-  tbody td{padding:8px 10px;vertical-align:top}
-  tbody td input,tbody td select{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:7px;padding:7px 9px;font-size:12px;color:var(--white);font-family:'Inter',sans-serif;outline:none;width:100%;transition:border-color 0.2s}
-  tbody td input:focus,tbody td select:focus{border-color:var(--accent)}
-  tbody td select option{background:var(--navy-mid)}
-  .btn-remove-bidder{background:none;border:1px solid rgba(239,68,68,0.3);color:var(--danger);border-radius:6px;padding:5px 8px;cursor:pointer;font-size:11px;transition:all 0.15s}
-  .btn-remove-bidder:hover{background:rgba(239,68,68,0.12)}
-  .btn-add-bidder{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:8px 14px;background:rgba(33,150,243,0.12);border:1px dashed rgba(33,150,243,0.4);border-radius:8px;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;font-family:'Inter',sans-serif}
-  .btn-add-bidder:hover{background:rgba(33,150,243,0.2)}
-  .action-bar{display:flex;align-items:center;gap:10px;padding:14px 28px;border-top:1px solid rgba(255,255,255,0.06);background:var(--navy-card);flex-shrink:0}
-  .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all 0.15s;font-family:'Inter',sans-serif}
-  .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:var(--white)}
-  .btn-primary:hover:not(:disabled){opacity:0.88;transform:translateY(-1px)}
-  .btn-primary:disabled{opacity:0.5;cursor:not-allowed}
-  .btn-outline{background:transparent;border:1px solid rgba(255,255,255,0.12);color:var(--grey-300)}
-  .btn-outline:hover{background:rgba(255,255,255,0.05);color:var(--white)}
-  .spinner-inline{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:var(--white);border-radius:50%;animation:spin 0.7s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .alert{border-radius:var(--radius);padding:10px 14px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:9px;margin-bottom:16px;max-width:960px}
-  .alert.error{background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);color:#FCA5A5}
-  .alert.success{background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.3);color:#86EFAC}
-  .alert.hidden{display:none}
-  .score-display{display:flex;align-items:center;gap:5px;padding:6px 10px;background:rgba(33,150,243,0.08);border:1px solid rgba(33,150,243,0.2);border-radius:7px;font-size:12px;color:var(--grey-300)}
-  .score-display strong{color:var(--gold);font-size:14px}
-  @media(max-width:800px){.sidebar{display:none}.fields-grid{grid-template-columns:1fr}.fields-grid .span-2{grid-column:1}.content{padding:14px}.action-bar{padding:12px 14px}}
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy:       #0D1B2A;
+    --navy-mid:   #1A2E45;
+    --navy-light: #243B55;
+    --accent:     #2196F3;
+    --gold:       #FFC107;
+    --white:      #FFFFFF;
+    --grey-100:   #F5F7FA;
+    --grey-300:   #CBD5E1;
+    --grey-500:   #64748B;
+    --grey-600:   #475569;
+    --danger:     #EF4444;
+    --success:    #22C55E;
+    --radius:     10px;
+    --shadow:     0 24px 64px rgba(0,0,0,0.45);
+  }
+
+  html, body {
+    min-height: 100%;
+    font-family: 'Inter', sans-serif;
+    background: var(--navy);
+    color: var(--white);
+  }
+
+  /* ── Animated background ── */
+  .bg {
+    position: fixed; inset: 0; z-index: 0;
+    background: linear-gradient(135deg, #0D1B2A 0%, #1A2E45 60%, #0D1B2A 100%);
+    overflow: hidden;
+  }
+  .bg::before {
+    content: '';
+    position: absolute; inset: -50%;
+    background-image:
+      linear-gradient(rgba(33,150,243,0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(33,150,243,0.07) 1px, transparent 1px);
+    background-size: 48px 48px;
+    animation: gridMove 20s linear infinite;
+  }
+  @keyframes gridMove { 0% { transform: translateY(0); } 100% { transform: translateY(48px); } }
+  .bg-orb {
+    position: absolute; border-radius: 50%;
+    filter: blur(80px); opacity: 0.15;
+    animation: pulse 6s ease-in-out infinite;
+  }
+  .bg-orb.one { width: 380px; height: 380px; background: #2196F3; top: -80px; right: -80px; }
+  .bg-orb.two { width: 260px; height: 260px; background: #FFC107; bottom: -50px; left: -50px; animation-delay: 3s; }
+  @keyframes pulse { 0%,100% { transform: scale(1); opacity: 0.15; } 50% { transform: scale(1.12); opacity: 0.22; } }
+
+  /* ── Page layout ── */
+  .page {
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+
+  /* ── Card ── */
+  .card {
+    width: 100%;
+    max-width: 560px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    backdrop-filter: blur(14px);
+    overflow: hidden;
+  }
+
+  .card-top {
+    background: linear-gradient(135deg, rgba(33,150,243,0.15), rgba(21,101,192,0.1));
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    padding: 28px 32px 24px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .card-icon {
+    width: 48px; height: 48px;
+    background: linear-gradient(135deg, #2196F3, #1565C0);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .card-top-text h2 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+  .card-top-text p {
+    font-size: 13px;
+    color: var(--grey-500);
+    line-height: 1.5;
+  }
+
+  .card-body {
+    padding: 28px 32px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* Alert */
+  .alert {
+    border-radius: var(--radius);
+    padding: 11px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    display: none;
+    align-items: center;
+    gap: 9px;
+  }
+  .alert.error   { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); color: #FCA5A5; display: flex; }
+  .alert.success { background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.3); color: #86EFAC; display: flex; }
+  .alert.hidden  { display: none !important; }
+
+  /* Section heading */
+  .section-head {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--grey-600);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: -8px;
+  }
+  .section-head::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255,255,255,0.06);
+  }
+
+  /* Form row */
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-row.full { grid-template-columns: 1fr; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--grey-300);
+  }
+  .required-mark { color: #FCA5A5; margin-left: 2px; }
+
+  .input-wrap { position: relative; }
+  .input-icon {
+    position: absolute; left: 12px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 15px; opacity: 0.45; pointer-events: none;
+  }
+  .form-group input,
+  .form-group select {
+    width: 100%;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: var(--radius);
+    padding: 11px 12px 11px 38px;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    color: var(--white);
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .form-group select { padding-left: 38px; cursor: pointer; }
+  .form-group input:focus,
+  .form-group select:focus {
+    border-color: var(--accent);
+    background: rgba(33,150,243,0.07);
+  }
+  .form-group input::placeholder { color: var(--grey-600); }
+  .form-group select option { background: #1A2E45; color: var(--white); }
+
+  /* Password toggle */
+  .toggle-pass {
+    position: absolute; right: 11px; top: 50%;
+    transform: translateY(-50%);
+    background: none; border: none;
+    color: var(--grey-500); cursor: pointer;
+    font-size: 15px; padding: 2px;
+    transition: color 0.15s;
+  }
+  .toggle-pass:hover { color: var(--white); }
+
+  /* Password strength */
+  .pwd-strength {
+    margin-top: 6px;
+    display: none;
+  }
+  .pwd-strength.visible { display: block; }
+  .pwd-track {
+    height: 3px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 99px;
+    overflow: hidden;
+    margin-bottom: 4px;
+  }
+  .pwd-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.3s, background 0.3s;
+  }
+  .pwd-label { font-size: 11px; font-weight: 600; }
+
+  /* Role card selector */
+  .role-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .role-card {
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: rgba(255,255,255,0.03);
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    position: relative;
+  }
+  .role-card:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.15); }
+  .role-card.selected { background: rgba(33,150,243,0.1); border-color: rgba(33,150,243,0.4); }
+  .role-card .rc-icon { font-size: 20px; }
+  .role-card .rc-title { font-size: 13px; font-weight: 600; color: var(--white); }
+  .role-card .rc-desc  { font-size: 11px; color: var(--grey-500); line-height: 1.4; }
+  .role-card .rc-check {
+    position: absolute;
+    top: 8px; right: 10px;
+    font-size: 13px;
+    color: var(--accent);
+    display: none;
+  }
+  .role-card.selected .rc-check { display: block; }
+  input[type="radio"].role-radio { display: none; }
+
+  /* Submit button */
+  .btn-submit {
+    width: 100%;
+    padding: 13px;
+    border-radius: var(--radius);
+    border: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    background: linear-gradient(135deg, #2196F3, #1565C0);
+    color: var(--white);
+    transition: opacity 0.2s, transform 0.15s;
+    position: relative;
+  }
+  .btn-submit:hover:not(:disabled) { opacity: 0.92; transform: translateY(-1px); }
+  .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-submit .spinner {
+    display: none;
+    width: 18px; height: 18px;
+    border: 2px solid rgba(255,255,255,0.35);
+    border-top-color: var(--white);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto;
+  }
+  .btn-submit.loading .btn-text { display: none; }
+  .btn-submit.loading .spinner  { display: block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Back link */
+  .back-link {
+    text-align: center;
+    font-size: 13px;
+    color: var(--grey-500);
+  }
+  .back-link a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+    transition: opacity 0.15s;
+  }
+  .back-link a:hover { opacity: 0.8; }
+
+  /* Admin-only notice */
+  .admin-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: rgba(255,193,7,0.08);
+    border: 1px solid rgba(255,193,7,0.2);
+    border-radius: var(--radius);
+    padding: 11px 14px;
+    font-size: 12px;
+    color: #FDE68A;
+    line-height: 1.5;
+  }
+  .admin-notice .icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+
+  /* ── Access Gate (shown if no admin session) ── */
+  .gate-overlay {
+    position: fixed; inset: 0; z-index: 500;
+    background: rgba(13,27,42,0.97);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+    padding: 24px;
+  }
+  .gate-overlay.hidden { display: none; }
+  .gate-icon { font-size: 48px; }
+  .gate-title { font-size: 20px; font-weight: 700; }
+  .gate-desc  { font-size: 14px; color: var(--grey-500); max-width: 340px; line-height: 1.6; }
+  .gate-form  { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 320px; margin-top: 8px; }
+  .gate-form input {
+    width: 100%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: var(--radius);
+    padding: 11px 14px;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    color: var(--white);
+    outline: none;
+    text-align: center;
+    letter-spacing: 0.1em;
+    transition: border-color 0.2s;
+  }
+  .gate-form input:focus { border-color: var(--accent); }
+  .gate-form input::placeholder { color: var(--grey-600); letter-spacing: 0; }
+  .gate-err { font-size: 12px; color: #FCA5A5; }
+  .gate-btn {
+    padding: 12px;
+    border-radius: var(--radius);
+    border: none;
+    background: linear-gradient(135deg, #2196F3, #1565C0);
+    color: var(--white);
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .gate-btn:hover { opacity: 0.9; }
+  .gate-back {
+    font-size: 13px;
+    color: var(--grey-500);
+  }
+  .gate-back a { color: var(--accent); text-decoration: none; font-weight: 600; }
+
+  @media (max-width: 560px) {
+    .form-row    { grid-template-columns: 1fr; }
+    .role-cards  { grid-template-columns: 1fr; }
+    .card-body   { padding: 22px 20px 28px; }
+    .card-top    { padding: 22px 20px 20px; }
+  }
 </style>
 </head>
 <body>
-<div class="app">
-  <aside class="sidebar">
-    <div class="sidebar-logo">
-      <div class="logo-mark" onclick="goTo('dashboard')">
-        <div class="logo-icon">📋</div>
-        <div class="logo-text">BidEval<span>Procurement Portal</span></div>
+
+<div class="bg">
+  <div class="bg-orb one"></div>
+  <div class="bg-orb two"></div>
+</div>
+
+<!-- ── Admin Auth Gate ── -->
+<div class="gate-overlay" id="gateOverlay">
+  <div class="gate-icon">🔐</div>
+  <div class="gate-title">Admin Access Required</div>
+  <div class="gate-desc">Only administrators can register new accounts. Please verify your admin credentials to continue.</div>
+  <div class="gate-form">
+    <input type="text"     id="gateUser" placeholder="Admin username" autocomplete="username"/>
+    <input type="password" id="gatePass" placeholder="Admin password" autocomplete="current-password"/>
+    <div class="gate-err" id="gateErr"></div>
+    <button class="gate-btn" onclick="verifyGate()">Verify & Continue</button>
+  </div>
+  <div class="gate-back">← <a href="?page=login">Back to Login</a></div>
+</div>
+
+<!-- ── Main Registration Card ── -->
+<div class="page">
+  <div class="card">
+    <div class="card-top">
+      <div class="card-icon">👤</div>
+      <div class="card-top-text">
+        <h2>Create Account</h2>
+        <p>Register a new user for the Bid Evaluation Portal. Admin credentials are required.</p>
       </div>
     </div>
-    <nav class="sidebar-nav">
-      <div class="nav-section-label">Main</div>
-      <button class="nav-item" onclick="goTo('dashboard')"><span class="icon">🏠</span> Dashboard</button>
-      <button class="nav-item active"><span class="icon">➕</span> Register New Bid</button>
-      <button class="nav-item" onclick="goTo('report')"><span class="icon">📊</span> Reports</button>
-    </nav>
-    <div class="sidebar-user">
-      <div class="user-avatar" id="userAvatar">A</div>
-      <div class="user-info"><strong id="userNameSidebar">—</strong><span id="userRoleSidebar">—</span></div>
-      <button class="btn-logout" onclick="doLogout()" title="Sign out">⏻</button>
-    </div>
-  </aside>
-  <div class="main">
-    <div class="topbar">
-      <div style="flex:1">
-        <h1>Register New Bid</h1>
-        <div class="breadcrumb"><a onclick="goTo('dashboard')">Dashboard</a> › Register Bid</div>
+
+    <div class="card-body">
+
+      <div class="admin-notice">
+        <span class="icon">ℹ️</span>
+        <span>Only administrators can create new accounts. All registered users will have access to bid evaluation activities based on their assigned role.</span>
       </div>
-    </div>
-    <div class="content">
-      <div id="alertBox" class="alert hidden"><span id="alertIcon"></span><span id="alertMsg"></span></div>
-      <div class="section-card">
-        <div class="section-card-title">📄 Bid Information</div>
-        <div class="fields-grid">
-          <div class="form-group"><label>Bid Number <span class="req">*</span></label><input type="text" id="bidNumber" placeholder="e.g. BID-2024-001" oninput="clearAlert()"/><span class="form-hint">Unique identifier for this bid</span></div>
-          <div class="form-group"><label>Bid Name <span class="req">*</span></label><input type="text" id="bidName" placeholder="e.g. Supply of Office Equipment" oninput="clearAlert()"/></div>
-          <div class="form-group"><label>PAC Level <span class="req">*</span></label><select id="pacLevel"><option value="">— Select PAC Level —</option><option value="PAC ONE">PAC ONE</option><option value="PAC TWO">PAC TWO</option><option value="PAC THREE">PAC THREE</option><option value="PAC FOUR">PAC FOUR</option></select><span class="form-hint">Purchase Approving Committee level</span></div>
-          <div class="form-group"><label>Purchase Method <span class="req">*</span></label><select id="purchaseMethod"><option value="">— Select Method —</option><option value="OPEN BID">Open Bid</option><option value="DIRECT PURCHASE">Direct Purchase</option><option value="PROFORMA">Proforma</option></select></div>
-          <div class="form-group span-2"><label>Notes / Remarks</label><textarea id="bidNotes" placeholder="Any additional notes about this bid…"></textarea></div>
+
+      <div id="mainAlert" class="alert hidden">
+        <span id="alertIcon">⚠️</span>
+        <span id="alertMsg"></span>
+      </div>
+
+      <!-- Personal Info -->
+      <div class="section-head">Personal Information</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Full Name <span class="required-mark">*</span></label>
+          <div class="input-wrap">
+            <span class="input-icon">👤</span>
+            <input type="text" id="fullName" placeholder="e.g. Ahmed Al-Farsi" autocomplete="name"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Email Address <span class="required-mark">*</span></label>
+          <div class="input-wrap">
+            <span class="input-icon">📧</span>
+            <input type="email" id="email" placeholder="e.g. ahmed@company.om" autocomplete="email"/>
+          </div>
         </div>
       </div>
-      <div class="section-card">
-        <div class="section-card-title">🏢 Bidders & Scores</div>
-        <div class="bidder-table-wrap">
-          <table><thead><tr><th>#</th><th>Bidder Name *</th><th>Technical Score</th><th>Financial Score</th><th>Total</th><th>Recommended</th><th>Notes</th><th></th></tr></thead>
-          <tbody id="bidderRows"></tbody></table>
+
+      <!-- Account Credentials -->
+      <div class="section-head">Account Credentials</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Username <span class="required-mark">*</span></label>
+          <div class="input-wrap">
+            <span class="input-icon">🔑</span>
+            <input type="text" id="username" placeholder="e.g. ahmed.farsi" autocomplete="off" oninput="validateUsername(this.value)"/>
+          </div>
         </div>
-        <button class="btn-add-bidder" onclick="addBidderRow()">＋ Add Bidder</button>
-      </div>
-      <div class="section-card">
-        <div class="section-card-title">❓ Clarification Requests <span style="font-size:11px;font-weight:400;color:var(--grey-500);margin-left:6px">(optional)</span></div>
-        <div class="clarif-table-wrap">
-          <table><thead><tr><th>#</th><th>Subject *</th><th>Request Date *</th><th>Expected Response</th><th>Status</th><th>Notes</th><th></th></tr></thead>
-          <tbody id="clarifRows"></tbody></table>
+        <div class="form-group">
+          <label>Department / Team</label>
+          <div class="input-wrap">
+            <span class="input-icon">🏢</span>
+            <input type="text" id="department" placeholder="e.g. Procurement" autocomplete="off"/>
+          </div>
         </div>
-        <button class="btn-add-bidder" onclick="addClarifRow()">＋ Add Clarification</button>
       </div>
-    </div>
-    <div class="action-bar">
-      <button class="btn btn-outline" onclick="goTo('dashboard')">← Cancel</button>
-      <button class="btn btn-primary" id="submitBtn" onclick="submitBid()">
-        <span id="submitBtnText">📋 Register Bid</span>
-        <span id="submitSpinner" style="display:none" class="spinner-inline"></span>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Password <span class="required-mark">*</span></label>
+          <div class="input-wrap">
+            <span class="input-icon">🔒</span>
+            <input type="password" id="password" placeholder="Min. 6 characters" autocomplete="new-password" oninput="checkStrength(this.value)"/>
+            <button type="button" class="toggle-pass" onclick="togglePwd('password', this)" title="Show/hide">👁</button>
+          </div>
+          <div class="pwd-strength" id="pwdStrength">
+            <div class="pwd-track"><div class="pwd-fill" id="pwdFill"></div></div>
+            <div class="pwd-label" id="pwdLabel"></div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Confirm Password <span class="required-mark">*</span></label>
+          <div class="input-wrap">
+            <span class="input-icon">🔒</span>
+            <input type="password" id="confirmPassword" placeholder="Re-enter password" autocomplete="new-password" oninput="checkMatch()"/>
+            <button type="button" class="toggle-pass" onclick="togglePwd('confirmPassword', this)" title="Show/hide">👁</button>
+          </div>
+          <div style="font-size:11px;font-weight:600;margin-top:4px" id="matchLabel"></div>
+        </div>
+      </div>
+
+      <!-- Role Selection -->
+      <div class="section-head">Role Assignment</div>
+      <div class="role-cards">
+        <label class="role-card selected" id="cardAdmin" onclick="selectRole('ADMIN')">
+          <input type="radio" name="role" value="ADMIN" class="role-radio" checked/>
+          <span class="rc-icon">🛡️</span>
+          <span class="rc-title">Administrator</span>
+          <span class="rc-desc">Full access: register bids, manage users, view all reports</span>
+          <span class="rc-check">✔</span>
+        </label>
+        <label class="role-card" id="cardEvaluator" onclick="selectRole('EVALUATOR')">
+          <input type="radio" name="role" value="EVALUATOR" class="role-radio"/>
+          <span class="rc-icon">📋</span>
+          <span class="rc-title">Evaluator</span>
+          <span class="rc-desc">Update activities, add bidders and clarifications</span>
+          <span class="rc-check">✔</span>
+        </label>
+      </div>
+
+      <button class="btn-submit" id="submitBtn" onclick="doRegister()">
+        <span class="btn-text">Create Account</span>
+        <div class="spinner"></div>
       </button>
+
+      <div class="back-link">Already have an account? <a href="?page=login">Sign in</a></div>
     </div>
   </div>
 </div>
+
 <script>
-  Session.guard();
-  window.addEventListener('load',()=>UI.initUserBar());
-  function goTo(p){window.location.href=p+'.html'}
-  function doLogout(){UI.doLogout()}
-  function showAlert(msg,type){const b=document.getElementById('alertBox');document.getElementById('alertIcon').textContent=type==='error'?'⚠️':'✅';document.getElementById('alertMsg').textContent=msg;b.className='alert '+type;b.scrollIntoView({behavior:'smooth',block:'nearest'})}
-  function clearAlert(){document.getElementById('alertBox').className='alert hidden'}
+// ─────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────
+let ADMIN_SESSION = null;
+let selectedRole  = 'ADMIN';
 
-  let bidderCount=0;
-  function addBidderRow(){
-    bidderCount++;const n=bidderCount;
-    const row=document.createElement('tr');row.id='bdr_'+n;
-    row.innerHTML=`<td style="color:var(--grey-500);font-size:11px;width:24px">${n}</td>
-      <td><input type="text" id="bdr_name_${n}" placeholder="Company name"/></td>
-      <td><input type="number" id="bdr_tech_${n}" placeholder="0" min="0" max="100" oninput="calcTotal(${n})"/></td>
-      <td><input type="number" id="bdr_fin_${n}" placeholder="0" min="0" max="100" oninput="calcTotal(${n})"/></td>
-      <td><div class="score-display">Total: <strong id="bdr_total_${n}">0</strong></div></td>
-      <td><select id="bdr_rec_${n}"><option value="NO">No</option><option value="YES">Yes</option></select></td>
-      <td><input type="text" id="bdr_notes_${n}" placeholder="Notes…"/></td>
-      <td><button class="btn-remove-bidder" onclick="removeBidderRow(${n})">✕</button></td>`;
-    document.getElementById('bidderRows').appendChild(row);
+// ─────────────────────────────────────────
+//  GATE — admin must verify before accessing
+// ─────────────────────────────────────────
+window.onload = function () {
+  // If already logged in as admin, skip gate
+  const sid = sessionStorage.getItem('sessionId');
+  const user = JSON.parse(sessionStorage.getItem('user') || 'null');
+  if (sid && user && user.role === 'ADMIN') {
+    ADMIN_SESSION = sid;
+    document.getElementById('gateOverlay').classList.add('hidden');
+    return;
   }
-  function removeBidderRow(n){const r=document.getElementById('bdr_'+n);if(r)r.remove()}
-  function calcTotal(n){
-    const t=parseFloat(document.getElementById('bdr_tech_'+n).value)||0;
-    const f=parseFloat(document.getElementById('bdr_fin_'+n).value)||0;
-    document.getElementById('bdr_total_'+n).textContent=(t+f).toFixed(1);
-  }
-  function getBidders(){
-    const rows=[];
-    for(let i=1;i<=bidderCount;i++){
-      const name=document.getElementById('bdr_name_'+i);if(!name)continue;
-      const v={bidderName:name.value.trim(),technicalScore:document.getElementById('bdr_tech_'+i).value,financialScore:document.getElementById('bdr_fin_'+i).value,recommended:document.getElementById('bdr_rec_'+i).value,notes:document.getElementById('bdr_notes_'+i).value};
-      if(v.bidderName)rows.push(v);
-    }
-    return rows;
-  }
-  addBidderRow();
+  // Show gate
+  document.getElementById('gateOverlay').classList.remove('hidden');
+};
 
-  let clarifCount=0;
-  function addClarifRow(){
-    clarifCount++;const n=clarifCount;
-    const row=document.createElement('tr');row.id='clf_'+n;
-    const today=new Date().toISOString().split('T')[0];
-    row.innerHTML=`<td style="color:var(--grey-500);font-size:11px;width:24px">${n}</td>
-      <td><input type="text" id="clf_subj_${n}" placeholder="Clarification subject…"/></td>
-      <td><input type="date" id="clf_req_${n}" value="${today}"/></td>
-      <td><input type="date" id="clf_res_${n}"/></td>
-      <td><select id="clf_status_${n}"><option value="PENDING">Pending</option><option value="RESPONDED">Responded</option><option value="CLOSED">Closed</option></select></td>
-      <td><input type="text" id="clf_notes_${n}" placeholder="Notes…"/></td>
-      <td><button class="btn-remove-bidder" onclick="removeClarifRow(${n})">✕</button></td>`;
-    document.getElementById('clarifRows').appendChild(row);
+function verifyGate() {
+  const username = document.getElementById('gateUser').value.trim();
+  const password = document.getElementById('gatePass').value;
+  const errEl    = document.getElementById('gateErr');
+  if (!username || !password) { errEl.textContent = 'Please enter both fields.'; return; }
+  errEl.textContent = '';
+
+  google.script.run
+    .withSuccessHandler(res => {
+      if (res.success && res.user.role === 'ADMIN') {
+        ADMIN_SESSION = res.sessionId;
+        sessionStorage.setItem('sessionId', res.sessionId);
+        sessionStorage.setItem('user', JSON.stringify(res.user));
+        document.getElementById('gateOverlay').classList.add('hidden');
+      } else if (res.success) {
+        errEl.textContent = 'Only administrators can access this page.';
+      } else {
+        errEl.textContent = res.message || 'Invalid credentials.';
+      }
+    })
+    .withFailureHandler(e => { errEl.textContent = 'Error: ' + e.message; })
+    .login(username, password);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const overlay = document.getElementById('gateOverlay');
+    if (!overlay.classList.contains('hidden')) verifyGate();
   }
-  function removeClarifRow(n){const r=document.getElementById('clf_'+n);if(r)r.remove()}
-  function getClarifications(){
-    const rows=[];
-    for(let i=1;i<=clarifCount;i++){
-      const s=document.getElementById('clf_subj_'+i);if(!s)continue;
-      const v={subject:s.value.trim(),requestDate:document.getElementById('clf_req_'+i).value,responseDate:document.getElementById('clf_res_'+i).value,status:document.getElementById('clf_status_'+i).value,notes:document.getElementById('clf_notes_'+i).value};
-      if(v.subject)rows.push(v);
-    }
-    return rows;
+});
+
+// ─────────────────────────────────────────
+//  ROLE SELECTOR
+// ─────────────────────────────────────────
+function selectRole(role) {
+  selectedRole = role;
+  document.getElementById('cardAdmin').classList.toggle('selected', role === 'ADMIN');
+  document.getElementById('cardEvaluator').classList.toggle('selected', role === 'EVALUATOR');
+  document.querySelector('input[name="role"][value="ADMIN"]').checked   = (role === 'ADMIN');
+  document.querySelector('input[name="role"][value="EVALUATOR"]').checked = (role === 'EVALUATOR');
+}
+
+// ─────────────────────────────────────────
+//  PASSWORD STRENGTH
+// ─────────────────────────────────────────
+function checkStrength(pwd) {
+  const wrap  = document.getElementById('pwdStrength');
+  const fill  = document.getElementById('pwdFill');
+  const label = document.getElementById('pwdLabel');
+
+  if (!pwd) { wrap.classList.remove('visible'); return; }
+  wrap.classList.add('visible');
+
+  let score = 0;
+  if (pwd.length >= 6)  score++;
+  if (pwd.length >= 10) score++;
+  if (/[A-Z]/.test(pwd)) score++;
+  if (/[0-9]/.test(pwd)) score++;
+  if (/[^A-Za-z0-9]/.test(pwd)) score++;
+
+  const levels = [
+    { pct: '20%', bg: '#EF4444', text: '🔴 Very weak',  col: '#FCA5A5' },
+    { pct: '40%', bg: '#F59E0B', text: '🟠 Weak',        col: '#FDE68A' },
+    { pct: '60%', bg: '#F59E0B', text: '🟡 Fair',         col: '#FDE68A' },
+    { pct: '80%', bg: '#22C55E', text: '🟢 Strong',       col: '#86EFAC' },
+    { pct: '100%',bg: '#22C55E', text: '✅ Very strong',  col: '#86EFAC' },
+  ];
+  const l = levels[Math.max(score - 1, 0)];
+  fill.style.width      = l.pct;
+  fill.style.background = l.bg;
+  label.textContent  = l.text;
+  label.style.color  = l.col;
+
+  checkMatch();
+}
+
+function checkMatch() {
+  const pwd  = document.getElementById('password').value;
+  const conf = document.getElementById('confirmPassword').value;
+  const lbl  = document.getElementById('matchLabel');
+  if (!conf) { lbl.textContent = ''; return; }
+  if (pwd === conf) {
+    lbl.textContent = '✅ Passwords match';
+    lbl.style.color = 'var(--success)';
+  } else {
+    lbl.textContent = '❌ Passwords do not match';
+    lbl.style.color = 'var(--danger)';
+  }
+}
+
+function validateUsername(val) {
+  // auto-lowercase, no spaces
+  document.getElementById('username').value = val.toLowerCase().replace(/\s/g, '');
+}
+
+// ─────────────────────────────────────────
+//  TOGGLE PASSWORD VISIBILITY
+// ─────────────────────────────────────────
+function togglePwd(inputId, btn) {
+  const inp = document.getElementById(inputId);
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+  else { inp.type = 'password'; btn.textContent = '👁'; }
+}
+
+// ─────────────────────────────────────────
+//  ALERT HELPERS
+// ─────────────────────────────────────────
+function showAlert(msg, type) {
+  const el   = document.getElementById('mainAlert');
+  const icon = document.getElementById('alertIcon');
+  const txt  = document.getElementById('alertMsg');
+  el.className = 'alert ' + type;
+  icon.textContent = type === 'error' ? '⚠️' : '✅';
+  txt.textContent  = msg;
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+function hideAlert() { document.getElementById('mainAlert').className = 'alert hidden'; }
+
+function setLoading(on) {
+  const btn = document.getElementById('submitBtn');
+  btn.classList.toggle('loading', on);
+  btn.disabled = on;
+}
+
+// ─────────────────────────────────────────
+//  REGISTER
+// ─────────────────────────────────────────
+function doRegister() {
+  hideAlert();
+
+  const fullName   = document.getElementById('fullName').value.trim();
+  const email      = document.getElementById('email').value.trim();
+  const username   = document.getElementById('username').value.trim();
+  const password   = document.getElementById('password').value;
+  const confirmPwd = document.getElementById('confirmPassword').value;
+  const department = document.getElementById('department').value.trim();
+  const role       = selectedRole;
+
+  // Validation
+  if (!fullName || !email || !username || !password || !confirmPwd) {
+    showAlert('Please fill in all required fields.', 'error'); return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showAlert('Please enter a valid email address.', 'error'); return;
+  }
+  if (username.length < 3) {
+    showAlert('Username must be at least 3 characters.', 'error'); return;
+  }
+  if (password.length < 6) {
+    showAlert('Password must be at least 6 characters.', 'error'); return;
+  }
+  if (password !== confirmPwd) {
+    showAlert('Passwords do not match.', 'error'); return;
   }
 
-  async function submitBid(){
-    clearAlert();
-    const bidNumber=document.getElementById('bidNumber').value.trim();
-    const bidName=document.getElementById('bidName').value.trim();
-    const pacLevel=document.getElementById('pacLevel').value;
-    const purchaseMethod=document.getElementById('purchaseMethod').value;
-    const notes=document.getElementById('bidNotes').value.trim();
-    if(!bidNumber){showAlert('Bid Number is required.','error');return}
-    if(!bidName){showAlert('Bid Name is required.','error');return}
-    if(!pacLevel){showAlert('Please select a PAC Level.','error');return}
-    if(!purchaseMethod){showAlert('Please select a Purchase Method.','error');return}
-    const bidders=getBidders();
-    const clarifs=getClarifications();
-    setSubmitting(true);
-    try{
-      const res=await BidAPI.registerBid({bidNumber,bidName,pacLevel,purchaseMethod,notes});
-      if(!res.success){setSubmitting(false);showAlert(res.message,'error');return}
-      const bidId=res.bidId;
-      // ✅ PARALLEL saves — all bidders and clarifs at once
-      await Promise.all([
-        BidderAPI.addBiddersBatch(bidders,bidId),
-        ClarifAPI.addClarifsBatch(clarifs,bidId)
-      ]);
-      setSubmitting(false);
-      showAlert('Bid registered successfully! Redirecting…','success');
-      BidAPI.invalidateCache();
-      setTimeout(()=>{localStorage.setItem('currentBidId',bidId);window.location.href='bidDetail.html'},800);
-    }catch(err){setSubmitting(false);showAlert('Error: '+err.message,'error')}
+  setLoading(true);
+
+  const adminUser = JSON.parse(sessionStorage.getItem('user') || '{}');
+
+  google.script.run
+    .withSuccessHandler(onRegisterSuccess)
+    .withFailureHandler(e => { setLoading(false); showAlert('Server error: ' + e.message, 'error'); })
+    .registerUser({ fullName, email, username, password, role, department }, ADMIN_SESSION);
+}
+
+function onRegisterSuccess(res) {
+  setLoading(false);
+  if (res.success) {
+    showAlert('Account created successfully! Username: ' + document.getElementById('username').value, 'success');
+    clearForm();
+  } else {
+    showAlert(res.message || 'Registration failed.', 'error');
   }
-  function setSubmitting(on){
-    document.getElementById('submitBtn').disabled=on;
-    document.getElementById('submitBtnText').style.display=on?'none':'inline';
-    document.getElementById('submitSpinner').style.display=on?'inline-block':'none';
-  }
+}
+
+function clearForm() {
+  ['fullName','email','username','department','password','confirmPassword'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('pwdStrength').classList.remove('visible');
+  document.getElementById('matchLabel').textContent = '';
+  selectRole('EVALUATOR');
+}
 </script>
 </body>
 </html>
