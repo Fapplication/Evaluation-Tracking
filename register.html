@@ -35,7 +35,7 @@
 
   .app { display: flex; height: 100vh; }
 
-  /* ── Sidebar (shared) ── */
+  /* ── Sidebar ── */
   .sidebar {
     width: var(--sidebar-w); background: var(--navy-card);
     border-right: 1px solid rgba(255,255,255,0.06);
@@ -72,9 +72,6 @@
   .content { flex: 1; overflow-y: auto; padding: 32px 40px; }
 
   /* ── Form layout ── */
-  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 980px; }
-  .form-grid.full-row { grid-column: 1 / -1; }
-
   .section-card {
     background: var(--navy-card); border: 1px solid rgba(255,255,255,0.06);
     border-radius: var(--radius-lg); padding: 26px 28px; margin-bottom: 24px;
@@ -366,14 +363,34 @@
 </div><!-- /app -->
 
 <script>
-  Session.guard();
-  const user = Session.getUser();
+  // ── Guard: only redirect if Session.guard exists AND user is not logged in ──
+  // This prevents a crash if apps.js hasn't fully loaded yet
+  if (typeof Session !== 'undefined' && typeof Session.guard === 'function') {
+    Session.guard();
+  } else {
+    // Fallback: wait for apps.js to load then check
+    window.addEventListener('load', function() {
+      if (typeof Session !== 'undefined' && typeof Session.guard === 'function') {
+        Session.guard();
+      }
+    });
+  }
 
-  // Init user UI
-  UI.initUserBar();
+  // Init user UI safely
+  window.addEventListener('load', function() {
+    if (typeof UI !== 'undefined' && typeof UI.initUserBar === 'function') {
+      UI.initUserBar();
+    }
+  });
 
   function goTo(page) { window.location.href = page + '.html'; }
-  function doLogout() { UI.doLogout(); }
+  function doLogout() {
+    if (typeof UI !== 'undefined' && typeof UI.doLogout === 'function') {
+      UI.doLogout();
+    } else {
+      window.location.href = 'login.html';
+    }
+  }
 
   // ── Alert ──
   function showAlert(msg, type) {
@@ -529,39 +546,47 @@
   // ──────────────────────────────────────────────
   function submitBid() {
     clearAlert();
-    const bidNumber     = document.getElementById('bidNumber').value.trim();
-    const bidName       = document.getElementById('bidName').value.trim();
-    const pacLevel      = document.getElementById('pacLevel').value;
-    const purchaseMethod= document.getElementById('purchaseMethod').value;
-    const notes         = document.getElementById('bidNotes').value.trim();
+    const bidNumber      = document.getElementById('bidNumber').value.trim();
+    const bidName        = document.getElementById('bidName').value.trim();
+    const pacLevel       = document.getElementById('pacLevel').value;
+    const purchaseMethod = document.getElementById('purchaseMethod').value;
+    const notes          = document.getElementById('bidNotes').value.trim();
 
-    if (!bidNumber)     { showAlert('Bid Number is required.', 'error'); return; }
-    if (!bidName)       { showAlert('Bid Name is required.', 'error'); return; }
-    if (!pacLevel)      { showAlert('Please select a PAC Level.', 'error'); return; }
-    if (!purchaseMethod){ showAlert('Please select a Purchase Method.', 'error'); return; }
+    if (!bidNumber)      { showAlert('Bid Number is required.', 'error'); return; }
+    if (!bidName)        { showAlert('Bid Name is required.', 'error'); return; }
+    if (!pacLevel)       { showAlert('Please select a PAC Level.', 'error'); return; }
+    if (!purchaseMethod) { showAlert('Please select a Purchase Method.', 'error'); return; }
 
-    const bidders  = getBidders();
-    const clarifs  = getClarifications();
+    const bidders = getBidders();
+    const clarifs = getClarifications();
 
     setSubmitting(true);
 
     const bidData = { bidNumber, bidName, pacLevel, purchaseMethod, notes };
 
-    BidAPI.registerBid(bidData).then(res => {
+    BidAPI.registerBid(bidData)
+      .then(res => {
         if (!res.success) { setSubmitting(false); showAlert(res.message, 'error'); return; }
         const bidId = res.bidId;
-        const saveBidders = (bidderList, callback) => {
-          if (!bidderList.length) { callback(); return; }
-          const b = bidderList.shift();
+
+        const saveBidders = (list, cb) => {
+          if (!list.length) { cb(); return; }
+          const b = list.shift();
           b.bidId = bidId;
-          BidderAPI.addBidder(b).then(() => saveBidders(bidderList, callback)).catch(e => console.error(e));
+          BidderAPI.addBidder(b)
+            .then(() => saveBidders(list, cb))
+            .catch(e => console.error('Bidder save error:', e));
         };
-        const saveClarifs = (clarifList, callback) => {
-          if (!clarifList.length) { callback(); return; }
-          const c = clarifList.shift();
+
+        const saveClarifs = (list, cb) => {
+          if (!list.length) { cb(); return; }
+          const c = list.shift();
           c.bidId = bidId;
-          ClarifAPI.addClarification(c).then(() => saveClarifs(clarifList, callback)).catch(e => console.error(e));
+          ClarifAPI.addClarification(c)
+            .then(() => saveClarifs(list, cb))
+            .catch(e => console.error('Clarif save error:', e));
         };
+
         saveBidders([...bidders], () => {
           saveClarifs([...clarifs], () => {
             setSubmitting(false);
@@ -572,13 +597,17 @@
             }, 1200);
           });
         });
-      }).catch(err => { setSubmitting(false); showAlert('Error: ' + err.message, 'error'); });
+      })
+      .catch(err => {
+        setSubmitting(false);
+        showAlert('Error: ' + err.message, 'error');
+      });
   }
 
   function setSubmitting(on) {
-    document.getElementById('submitBtn').disabled          = on;
-    document.getElementById('submitBtnText').style.display = on ? 'none' : 'inline';
-    document.getElementById('submitSpinner').style.display = on ? 'inline-block' : 'none';
+    document.getElementById('submitBtn').disabled           = on;
+    document.getElementById('submitBtnText').style.display  = on ? 'none' : 'inline';
+    document.getElementById('submitSpinner').style.display  = on ? 'inline-block' : 'none';
   }
 </script>
 </body>
