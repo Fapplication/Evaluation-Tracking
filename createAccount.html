@@ -341,27 +341,27 @@
 
     const userData = { firstName, lastName, username, role, password };
 
-    // Use Auth.register if available in apps.js, otherwise fall back gracefully
-    if (typeof Auth !== 'undefined' && typeof Auth.register === 'function') {
-      Auth.register(userData)
-        .then(res => {
-          setLoading(false);
-          if (res.success) {
-            showAlert('Account created successfully! Redirecting to login…', 'success');
-            setTimeout(() => { window.location.href = 'login.html'; }, 1400);
-          } else {
-            showAlert(res.message || 'Registration failed. Please try again.', 'error');
-          }
-        })
-        .catch(err => {
-          setLoading(false);
-          showAlert('Server error: ' + err.message, 'error');
-        });
-    } else {
-      // apps.js doesn't expose Auth.register yet — show a clear message
-      setLoading(false);
-      showAlert('Registration is not yet configured. Ask your admin to add Auth.register() to apps.js.', 'error');
-    }
+    // Call Auth.registerUser() which exists in apps.js
+    Auth.registerUser({
+      username : userData.username,
+      password : userData.password,
+      fullName : userData.firstName + ' ' + userData.lastName,
+      role     : userData.role,
+      email    : ''
+    })
+      .then(res => {
+        setLoading(false);
+        if (res.success) {
+          showAlert('Account created successfully! Redirecting to login…', 'success');
+          setTimeout(() => { window.location.href = 'login.html'; }, 1400);
+        } else {
+          showAlert(res.message || 'Registration failed. Please try again.', 'error');
+        }
+      })
+      .catch(err => {
+        setLoading(false);
+        showAlert('Server error: ' + err.message, 'error');
+      });
   }
 
   // Enter key support
