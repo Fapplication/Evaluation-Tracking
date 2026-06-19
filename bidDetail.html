@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Bid Evaluation Portal — Bid Detail</title>
+<script src="apps.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy:        #0D1B2A;
+    --navy-mid:    #1A2E45;
+    --navy-light:  #243B55;
+    --navy-card:   #162032;
+    --accent:      #2196F3;
+    --accent-dark: #1565C0;
+    --gold:        #FFC107;
+    --white:       #FFFFFF;
+    --grey-300:    #CBD5E1;
+    --grey-500:    #64748B;
+    --danger:      #EF4444;
+    --warning:     #F59E0B;
+    --success:     #22C55E;
+    --radius:      10px;
+    --radius-lg:   16px;
+    --sidebar-w:   240px;
+  }
+
+  html, body { height: 100%; font-family: 'Inter', sans-serif; background: var(--navy); color: var(--white); }
+  .app { display: flex; height: 100vh; }
+
+  /* ── Sidebar ── */
+  .sidebar { width: var(--sidebar-w); background: var(--navy-card); border-right: 1px solid rgba(255,255,255,0.06); display: flex; flex-direction: column; flex-shrink: 0; }
+  .sidebar-logo { padding: 22px 20px 18px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .logo-mark { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent), var(--accent-dark)); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .logo-text { font-size: 14px; font-weight: 700; line-height: 1.2; }
+  .logo-text span { display: block; font-size: 10px; font-weight: 400; color: var(--grey-500); letter-spacing: 0.05em; }
+  .sidebar-nav { flex: 1; padding: 16px 10px; display: flex; flex-direction: column; gap: 2px; }
+  .nav-section-label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--grey-500); padding: 12px 10px 6px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--grey-300); cursor: pointer; transition: all 0.15s; border: none; background: none; width: 100%; text-align: left; }
+  .nav-item:hover { background: rgba(255,255,255,0.05); color: var(--white); }
+  .nav-item.active { background: rgba(33,150,243,0.15); color: var(--accent); }
+  .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+  .sidebar-user { padding: 14px 16px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; gap: 10px; }
+  .user-avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent-dark)); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0; }
+  .user-info { flex: 1; min-width: 0; }
+  .user-info strong { display: block; font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-info span { font-size: 11px; color: var(--grey-500); }
+  .btn-logout { background: none; border: none; color: var(--grey-500); cursor: pointer; font-size: 16px; padding: 4px; transition: color 0.15s; }
+  .btn-logout:hover { color: var(--danger); }
+
+  /* ── Main ── */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .topbar { padding: 14px 28px; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; gap: 16px; background: var(--navy-card); flex-shrink: 0; }
+  .topbar-left { flex: 1; }
+  .topbar-left h1 { font-size: 17px; font-weight: 700; }
+  .breadcrumb { font-size: 12px; color: var(--grey-500); display: flex; align-items: center; gap: 5px; margin-top: 2px; }
+  .breadcrumb a { color: var(--accent); cursor: pointer; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; font-family: 'Inter', sans-serif; }
+  .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent-dark)); color: var(--white); }
+  .btn-primary:hover:not(:disabled) { opacity: 0.88; }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-outline { background: transparent; border: 1px solid rgba(255,255,255,0.12); color: var(--grey-300); }
+  .btn-outline:hover { background: rgba(255,255,255,0.05); color: var(--white); }
+  .btn-success { background: linear-gradient(135deg, #22C55E, #16A34A); color: var(--white); }
+  .btn-success:hover { opacity: 0.88; }
+
+  /* ── Tab bar ── */
+  .tab-bar { display: flex; gap: 0; border-bottom: 1px solid rgba(255,255,255,0.06); background: var(--navy-card); padding: 0 28px; flex-shrink: 0; }
+  .tab-btn { padding: 13px 20px; font-size: 13px; font-weight: 600; color: var(--grey-500); border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; font-family: 'Inter', sans-serif; display: flex; align-items: center; gap: 7px; }
+  .tab-btn:hover { color: var(--grey-300); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-badge { background: var(--danger); color: var(--white); font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 8px; }
+
+  /* ── Content ── */
+  .content { flex: 1; overflow-y: auto; padding: 24px 28px; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── Bid header card ── */
+  .bid-header-card {
+    background: var(--navy-card); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: var(--radius-lg); padding: 22px 26px; margin-bottom: 22px;
+    display: flex; align-items: flex-start; gap: 24px; flex-wrap: wrap;
+  }
+  .bid-header-main { flex: 1; min-width: 200px; }
+  .bid-num { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--accent); font-weight: 500; margin-bottom: 5px; }
+  .bid-title { font-size: 20px; font-weight: 700; margin-bottom: 12px; }
+  .bid-meta { display: flex; flex-wrap: wrap; gap: 10px; }
+  .meta-chip { display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+  .chip-blue   { background: rgba(33,150,243,0.15); color: #90CAF9; }
+  .chip-orange { background: rgba(245,158,11,0.15); color: #FCD34D; }
+  .chip-green  { background: rgba(34,197,94,0.15);  color: #86EFAC; }
+  .chip-red    { background: rgba(239,68,68,0.15);  color: #FCA5A5; }
+  .chip-purple { background: rgba(139,92,246,0.15); color: #C4B5FD; }
+  .chip-grey   { background: rgba(100,116,139,0.15); color: var(--grey-300); }
+  .bid-header-progress { text-align: center; min-width: 110px; }
+  .circle-progress { position: relative; width: 90px; height: 90px; margin: 0 auto 8px; }
+  .circle-progress svg { transform: rotate(-90deg); }
+  .circle-bg    { fill: none; stroke: rgba(255,255,255,0.07); stroke-width: 8; }
+  .circle-fill  { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 0.6s ease; }
+  .circle-text  { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; }
+  .progress-label { font-size: 11px; color: var(--grey-500); font-weight: 500; }
+
+  /* ── Section card ── */
+  .section-card { background: var(--navy-card); border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-lg); padding: 22px 24px; margin-bottom: 20px; }
+  .section-card-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .section-card-title h3 { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; color: var(--grey-300); }
+
+  /* ── Activity grid ── */
+  .activity-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .activity-item {
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+    border-radius: var(--radius); padding: 16px 18px;
+    transition: border-color 0.2s;
+  }
+  .activity-item:hover { border-color: rgba(33,150,243,0.3); }
+  .activity-item.delayed { border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.04); }
+  .activity-item.completed { border-color: rgba(34,197,94,0.3); background: rgba(34,197,94,0.04); }
+
+  .act-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .act-title { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 7px; }
+  .act-status-chip { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 12px; }
+  .status-pending   { background: rgba(100,116,139,0.2); color: var(--grey-300); }
+  .status-ongoing   { background: rgba(33,150,243,0.2);  color: #90CAF9; }
+  .status-completed { background: rgba(34,197,94,0.2);   color: #86EFAC; }
+  .status-delayed   { background: rgba(239,68,68,0.2);   color: #FCA5A5; }
+
+  .act-dates { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .act-date-field label { display: block; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--grey-500); margin-bottom: 5px; }
+  .act-date-field input[type="date"] { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 7px; padding: 7px 10px; font-size: 12px; color: var(--white); font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s; }
+  .act-date-field input:focus { border-color: var(--accent); }
+
+  .act-status-row { display: flex; align-items: center; gap: 8px; }
+  .act-status-row label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--grey-500); white-space: nowrap; }
+  .act-status-row select { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 7px; padding: 7px 10px; font-size: 12px; color: var(--white); font-family: 'Inter', sans-serif; outline: none; cursor: pointer; }
+  .act-status-row select option { background: var(--navy-mid); }
+  .act-status-row select:focus { border-color: var(--accent); }
+
+  .delay-warning { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 11px; color: #FCA5A5; font-weight: 600; }
+
+  /* ── Bidder table ── */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th { padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--grey-500); border-bottom: 1px solid rgba(255,255,255,0.07); white-space: nowrap; }
+  tbody tr { border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.12s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(255,255,255,0.02); }
+  tbody td { padding: 12px 14px; font-size: 13px; vertical-align: middle; }
+  .rank-badge { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+  .rank-1 { background: #FFC107; color: #000; }
+  .rank-2 { background: #94A3B8; color: #000; }
+  .rank-3 { background: #CD7F32; color: #fff; }
+  .rank-n { background: rgba(255,255,255,0.08); color: var(--grey-300); }
+  .score-bar-wrap { display: flex; align-items: center; gap: 8px; }
+  .score-bar { flex: 1; height: 6px; background: rgba(255,255,255,0.07); border-radius: 3px; overflow: hidden; min-width: 60px; }
+  .score-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--accent), var(--accent-dark)); }
+  .recommended-star { color: var(--gold); font-size: 14px; }
+
+  /* Inline edit fields for bidder table */
+  .inline-input { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 5px 8px; font-size: 12px; color: var(--white); font-family: 'Inter', sans-serif; outline: none; width: 100%; }
+  .inline-input:focus { border-color: var(--accent); }
+  .inline-select { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 5px 8px; font-size: 12px; color: var(--white); font-family: 'Inter', sans-serif; outline: none; cursor: pointer; }
+  .inline-select option { background: var(--navy-mid); }
+
+  /* ── Clarification table ── */
+  .clarif-status { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 12px; }
+  .clarif-pending    { background: rgba(245,158,11,0.2);  color: #FCD34D; }
+  .clarif-responded  { background: rgba(33,150,243,0.2);  color: #90CAF9; }
+  .clarif-closed     { background: rgba(34,197,94,0.2);   color: #86EFAC; }
+
+  /* ── Add row button ── */
+  .btn-add-row { display: inline-flex; align-items: center; gap: 7px; margin-top: 14px; padding: 8px 14px; background: rgba(33,150,243,0.1); border: 1px dashed rgba(33,150,243,0.35); border-radius: 8px; color: var(--accent); font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; font-family: 'Inter', sans-serif; }
+  .btn-add-row:hover { background: rgba(33,150,243,0.18); }
+  .btn-remove-row { background: none; border: 1px solid rgba(239,68,68,0.25); color: var(--danger); border-radius: 5px; padding: 4px 8px; cursor: pointer; font-size: 11px; transition: all 0.15s; }
+  .btn-remove-row:hover { background: rgba(239,68,68,0.1); }
+
+  /* ── Save bar ── */
+  .save-bar { display: flex; align-items: center; gap: 10px; padding: 14px 28px; border-top: 1px solid rgba(255,255,255,0.06); background: var(--navy-card); flex-shrink: 0; }
+  .save-hint { font-size: 12px; color: var(--grey-500); flex: 1; }
+
+  /* ── Toast ── */
+  #toast { position: fixed; bottom: 24px; right: 24px; z-index: 9999; background: var(--navy-light); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 12px 18px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); transform: translateY(70px); opacity: 0; transition: all 0.3s; max-width: 320px; }
+  #toast.show { transform: translateY(0); opacity: 1; }
+
+  /* ── Loading overlay ── */
+  .loading-overlay { display: flex; align-items: center; justify-content: center; padding: 60px; color: var(--grey-500); gap: 12px; font-size: 14px; }
+  .spinner { display: inline-block; width: 22px; height: 22px; border: 2px solid rgba(255,255,255,0.15); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner-sm { width: 14px; height: 14px; border-width: 2px; }
+
+  /* Empty state */
+  .empty-state { padding: 40px; text-align: center; color: var(--grey-500); font-size: 13px; }
+  .empty-icon { font-size: 36px; margin-bottom: 10px; }
+
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .activity-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark" onclick="goTo('dashboard')">
+        <div class="logo-icon">📋</div>
+        <div class="logo-text">BidEval<span>Procurement Portal</span></div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <button class="nav-item" onclick="goTo('dashboard')"><span class="icon">🏠</span> Dashboard</button>
+      <button class="nav-item" onclick="goTo('register')"><span class="icon">➕</span> Register New Bid</button>
+      <button class="nav-item" onclick="goTo('report')"><span class="icon">📊</span> Reports</button>
+      <div class="nav-section-label">Current Bid</div>
+      <button class="nav-item active"><span class="icon">📁</span> Bid Detail</button>
+    </nav>
+    <div class="sidebar-user">
+      <div class="user-avatar" id="userAvatar">A</div>
+      <div class="user-info">
+        <strong id="userNameSidebar">—</strong>
+        <span id="userRoleSidebar">—</span>
+      </div>
+      <button class="btn-logout" onclick="doLogout()" title="Sign out">⏻</button>
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1 id="topbarTitle">Bid Detail</h1>
+        <div class="breadcrumb">
+          <a onclick="goTo('dashboard')">Dashboard</a> › <span id="breadcrumbBidName">Loading…</span>
+        </div>
+      </div>
+      <button class="btn btn-outline" onclick="loadBid()">↺ Refresh</button>
+    </div>
+
+    <!-- Tab bar -->
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('overview',    this)">📋 Overview</button>
+      <button class="tab-btn"        onclick="switchTab('technical',   this)">🔬 Technical Evaluation</button>
+      <button class="tab-btn"        onclick="switchTab('financial',   this)">💰 Financial Evaluation</button>
+      <button class="tab-btn"        onclick="switchTab('bidders',     this)">🏢 Bidders</button>
+      <button class="tab-btn"        onclick="switchTab('clarifications', this)">❓ Clarifications <span class="tab-badge" id="clarifBadge" style="display:none">0</span></button>
+    </div>
+
+    <!-- Content -->
+    <div class="content" id="mainContent">
+
+      <!-- ══ OVERVIEW TAB ══ -->
+      <div class="tab-panel active" id="tab-overview">
+        <div id="overviewLoading" class="loading-overlay"><div class="spinner"></div> Loading bid…</div>
+        <div id="overviewContent" style="display:none">
+
+          <!-- Bid header -->
+          <div class="bid-header-card">
+            <div class="bid-header-main">
+              <div class="bid-num" id="ovBidNum">—</div>
+              <div class="bid-title" id="ovBidName">—</div>
+              <div class="bid-meta">
+                <span class="meta-chip chip-blue"   id="ovPac">—</span>
+                <span class="meta-chip chip-purple" id="ovMethod">—</span>
+                <span class="meta-chip"             id="ovPhase">—</span>
+                <span class="meta-chip"             id="ovStatus">—</span>
+              </div>
+            </div>
+            <div class="bid-header-progress">
+              <div class="circle-progress">
+                <svg viewBox="0 0 90 90" width="90" height="90">
+                  <circle class="circle-bg"   cx="45" cy="45" r="38"/>
+                  <circle class="circle-fill" cx="45" cy="45" r="38" id="circleArc"
+                    stroke="#2196F3"
+                    stroke-dasharray="238.76"
+                    stroke-dashoffset="238.76"/>
+                </svg>
+                <div class="circle-text" id="circleText">0%</div>
+              </div>
+              <div class="progress-label">Overall Progress</div>
+            </div>
+          </div>
+
+          <!-- Delay alerts -->
+          <div id="delayAlerts"></div>
+
+          <!-- Mini activity summary -->
+          <div class="section-card">
+            <div class="section-card-title">
+              <h3>⚡ Activity Summary</h3>
+            </div>
+            <div id="activitySummary"></div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ══ TECHNICAL TAB ══ -->
+      <div class="tab-panel" id="tab-technical">
+        <div class="section-card">
+          <div class="section-card-title">
+            <h3>🔬 Technical Evaluation Activities</h3>
+            <button class="btn btn-primary" onclick="saveTechActivities()">
+              <span id="techSaveTxt">💾 Save Changes</span>
+              <span id="techSaveSpinner" style="display:none" class="spinner spinner-sm"></span>
+            </button>
+          </div>
+          <div class="activity-grid">
+
+            <!-- Tech Doc Collection -->
+            <div class="activity-item" id="act-tech-doc">
+              <div class="act-header">
+                <div class="act-title">📄 Technical Document Collection</div>
+                <span class="act-status-chip" id="chip-tech-doc">Pending</span>
+              </div>
+              <div class="act-dates">
+                <div class="act-date-field">
+                  <label>Start Date</label>
+                  <input type="date" id="techDocStart" onchange="refreshChip('tech-doc')"/>
+                </div>
+                <div class="act-date-field">
+                  <label>End Date</label>
+                  <input type="date" id="techDocEnd" onchange="refreshChip('tech-doc')"/>
+                </div>
+              </div>
+              <div class="act-status-row">
+                <label>Status</label>
+                <select id="techDocStatus" onchange="refreshChip('tech-doc')">
+                  <option value="PENDING">Pending</option>
+                  <option value="ONGOING">Ongoing</option>
+                  <option value="COMPLETED">Completed</option>
+                </select>
+              </div>
+              <div id="delay-tech-doc" class="delay-warning" style="display:none">⚠ Activity delayed</div>
+            </div>
+
+            <!-- Clarification -->
+            <div class="activity-item" id="act-clarification">
+              <div class="act-header">
+                <div class="act-title">❓ Clarification Request</div>
+                <span class="act-status-chip" id="chip-clarification">Pending</span>
+              </div>
+              <div class="act-dates">
+                <div class="act-date-field">
+                  <label>Start Date</label>
+                  <input type="date" id="clarificationStart" onchange="refreshChip('clarification')"/>
+                </div>
+                <div class="act-date-field">
+                  <label>End Date</label>
+                  <input type="date" id="clarificationEnd" onchange="refreshChip('clarification')"/>
+                </div>
+              </div>
+              <div class="act-status-row">
+                <label>Status</label>
+                <select id="clarificationStatus" onchange="refreshChip('clarification')">
+                  <option value="PENDING">Pending</option>
+                  <option value="ONGOING">Ongoing</option>
+                  <option value="COMPLETED">Completed</option>
+                  <option value="N/A">N/A (No Clarification)</option>
+                </select>
+              </div>
+              <div id="delay-clarification" class="delay-warning" style="display:none">⚠ Activity delayed</div>
+            </div>
+
+            <!-- Tech Eval Progress -->
+            <div class="activity-item" id="act-eval-progress">
+              <div class="act-header">
+                <div class="act-title">📊 Technical Evaluation Progress</div>
+                <span class="act-status-chip" id="chip-eval-progress">Pending</span>
+              </div>
+              <div class="act-dates">
+                <div class="act-date-field">
+                  <label>Start Date</label>
+                  <input type="date" id="evalProgressStart" onchange="refreshChip('eval-progress')"/>
+                </div>
+                <div class="act-date-field">
+                  <label>End Date</label>
+                  <input type="date" id="evalProgressEnd" onchange="refreshChip('eval-progress')"/>
+                </div>
+              </div>
+              <div class="act-status-row">
+                <label>Status</label>
+                <select id="evalProgressStatus" onchange="refreshChip('eval-progress')">
+                  <option value="PENDING">Pending</option>
+                  <option value="ONGOING">Ongoing</option>
+                  <option value="COMPLETED">Completed</option>
+                </select>
+              </div>
+              <div id="delay-eval-progress" class="delay-warning" style="display:none">⚠ Activity delayed</div>
+            </div>
+
+            <!-- Tech Eval Report -->
+            <div class="activity-item" id="act-eval-report">
+              <div class="act-header">
+                <div class="act-title">📋 Technical Evaluation Report Submittal</div>
+                <span class="act-status-chip" id="chip-eval-report">Pending</span>
+              </div>
+              <div class="act-dates">
+                <div class="act-date-field">
+                  <label>Start Date</label>
+                  <input type="date" id="evalReportStart" onchange="refreshChip('eval-report')"/>
+                </div>
+                <div class="act-date-field">
+                  <label>End Date</label>
+                  <input type="date" id="evalReportEnd" onchange="refreshChip('eval-report')"/>
+                </div>
+              </div>
+              <div class="act-status-row">
+                <label>Status</label>
+                <select id="evalReportStatus" onchange="refreshChip('eval-report')">
+                  <option value="PENDING">Pending</option>
+                  <option value="ONGOING">Ongoing</option>
+                  <option value="COMPLETED">Completed</option>
+                </select>
+              </div>
+              <div id="delay-eval-report" class="delay-warning" style="display:none">⚠ Activity delayed</div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ FINANCIAL TAB ══ -->
+      <div class="tab-panel" id="tab-financial">
+        <div class="section-card">
+          <div class="section-card-title">
+            <h3>💰 Financial Evaluation Activities</h3>
+            <button class="btn btn-primary" onclick="saveFinActivities()">
+              <span id="finSaveTxt">💾 Save Changes</span>
+              <span id="finSaveSpinner" style="display:none" class="spinner spinner-sm"></span>
+            </button>
+          </div>
+          <div class="activity-grid">
+
+            <!-- Fin Doc Collection -->
+            <div class="activity-item" id="act-fin-doc">
+              <div class="act-header">
+                <div class="act-title">📂 Financial Document Collection</div>
+                <span class="act-status-chip" id="chip-fin-doc">Pending</span>
+              </div>
+              <div class="act-dates">
+                <div class="act-date-field">
+                  <label>Start Date</label>
+                  <input type="date" id="finDocStart" onchange="refreshChip('fin-doc')"/>
+                </div>
+                <div class="act-date-field">
+                  <label>End Date</label>
+                  <input type="date" id="finDocEnd" onchange="refreshChip('fin-doc')"/>
+                </div>
+              </div>
+              <div class="act-status-row">
+                <label>Status</label>
+                <select id="finDocStatus" onchange="refreshChip('fin-doc')">
+                  <option value="PENDING">Pending</option>
+                  <option value="ONGOING">Ongoing</option>
+                  <option value="COMPLETED">Completed</option>
+                </select>
+              </div>
+              <div id="delay-fin-doc" class="delay-warning" style="display:none">⚠ Activity delayed</div>
+            </div>
+
+            <!-- Eng Estimation -->
+            <div class="activity-item" id="act-eng-est">
+              <div class="act-header">
+                <div class="act-title">🏗 Engineering Estimation & Approved Budget</div>
+                <span class="act-status-chip" id="chip-eng-est">Pending</span>
+              </div>
+              <div class="act-dates">
+                <div class="act-date-field">
+                  <label>Start Date</label>
+                  <input type="date" id="engEstStart" onchange="refreshChip('eng-est')"/>
+                </div>
+                <div class="act-date-field">
+                  <label>End Date</label>
+                  <input type="date" id="engEstEnd" onchange="refreshChip('eng-est')"/>
+                </div>
+              </div>
+              <div class="act-status-row">
+                <label>Status</label>
+                <select id="engEstStatus" onchange="refreshChip('eng-est')">
+                  <option value="PENDING">Pending</option>
+                  <option value="ONGOING">Ongoing</option>
+                  <option value="COMPLETED">Completed</option>
+                </select>
+              </div>
+              <div id="delay-eng-est" class="delay-warning" style="display:none">⚠ Activity delayed</div>
+            </div>
+
+            <!-- Doc Authentication -->
+            <div class="activity-item" id="act-doc-auth">
+              <div class="act-header">
+                <div class="act-title">🔏 Document Authentication</div>
+                <span class="act-status-chip" id="chip-doc-auth">Pending</span>
+              </div>
+              <div class="act-dates">
+                <div class="act-date-field">
+                  <label>Start Date</label>
+                  <input type="date" id="docAuthStart" onchange="refreshChip('doc-auth')"/>
+                </div>
+                <div class="act-date-field">
+                  <label>End Date</label>
+                  <input type="date" id="docAuthEnd" onchange="refreshChip('doc-auth')"/>
+                </div>
+              </div>
+              <div class="act-status-row">
+                <label>Status</label>
+                <select id="docAuthStatus" onchange="refreshChip('doc-auth')">
+                  <option value="PENDING">Pending</option>
+                  <option value="ONGOING">Ongoing</option>
+                  <option value="COMPLETED">Completed</option>
+                  <option value="N/A">N/A (Not Required)</option>
+                </select>
+              </div>
+              <div id="delay-doc-auth" class="delay-warning" style="display:none">⚠ Activity delayed</div>
+            </div>
+
+            <!-- Fin Eval Report -->
+            <div class="activity-item" id="act-fin-report">
+              <div class="act-header">
+                <div class="act-title">📑 Financial Evaluation Report</div>
+                <span class="act-status-chip" id="chip-fin-report">Pending</span>
+              </div>
+              <div class="act-dates">
+                <div class="act-date-field">
+                  <label>Start Date</label>
+                  <input type="date" id="finReportStart" onchange="refreshChip('fin-report')"/>
+                </div>
+                <div class="act-date-field">
+                  <label>End Date</label>
+                  <input type="date" id="finReportEnd" onchange="refreshChip('fin-report')"/>
+                </div>
+              </div>
+              <div class="act-status-row">
+                <label>Status</label>
+                <select id="finReportStatus" onchange="refreshChip('fin-report')">
+                  <option value="PENDING">Pending</option>
+                  <option value="ONGOING">Ongoing</option>
+                  <option value="COMPLETED">Completed</option>
+                </select>
+              </div>
+              <div id="delay-fin-report" class="delay-warning" style="display:none">⚠ Activity delayed</div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ BIDDERS TAB ══ -->
+      <div class="tab-panel" id="tab-bidders">
+        <div class="section-card">
+          <div class="section-card-title">
+            <h3>🏢 Bidders & Scores</h3>
+            <button class="btn btn-primary" onclick="saveBidders()">
+              <span id="bidderSaveTxt">💾 Save Bidders</span>
+              <span id="bidderSaveSpinner" style="display:none" class="spinner spinner-sm"></span>
+            </button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Bidder Name</th>
+                  <th>Technical Score</th>
+                  <th>Financial Score</th>
+                  <th>Total Score</th>
+                  <th>Recommended</th>
+                  <th>Notes</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="bidderTableBody"></tbody>
+            </table>
+          </div>
+          <button class="btn-add-row" onclick="addNewBidderRow()">＋ Add Bidder</button>
+        </div>
+      </div>
+
+      <!-- ══ CLARIFICATIONS TAB ══ -->
+      <div class="tab-panel" id="tab-clarifications">
+        <div class="section-card">
+          <div class="section-card-title">
+            <h3>❓ Clarification Requests</h3>
+            <button class="btn btn-primary" onclick="saveClarifications()">
+              <span id="clarifSaveTxt">💾 Save Clarifications</span>
+              <span id="clarifSaveSpinner" style="display:none" class="spinner spinner-sm"></span>
+            </button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Subject</th>
+                  <th>Request Date</th>
+                  <th>Response Date</th>
+                  <th>Status</th>
+                  <th>Notes</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="clarifTableBody"></tbody>
+            </table>
+          </div>
+          <button class="btn-add-row" onclick="addNewClarifRow()">＋ Add Clarification</button>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+
+    <!-- Save bar -->
+    <div class="save-bar">
+      <span class="save-hint" id="saveHint">Select a tab and update activities, then click Save Changes.</span>
+    </div>
+
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"><span id="toastIcon"></span><span id="toastMsg"></span></div>
+
+<script>
+  // ── Auth ──
+  Session.guard();
+  const user  = Session.getUser();
+  const bidId = localStorage.getItem('currentBidId');
+  if (!bidId) { window.location.href = 'dashboard.html'; }
+
+  UI.initUserBar();
+
+  function goTo(p) { window.location.href = p + '.html'; }
+  function doLogout() { UI.doLogout(); }
+
+  // ── Tab switching ──
+  function switchTab(name, el) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    el.classList.add('active');
+    const hints = { overview: 'Bid overview and delay summary.', technical: 'Update technical activity dates and status, then save.', financial: 'Update financial activity dates and status, then save.', bidders: 'Edit bidder scores and ranking, then save.', clarifications: 'Track clarification requests, then save.' };
+    document.getElementById('saveHint').textContent = hints[name] || '';
+  }
+
+  // ── Load bid ──
+  let currentBid = null;
+  let newBidderRows = [];
+  let newClarifRows = [];
+
+  function loadBid() {
+    document.getElementById('overviewLoading').style.display = 'flex';
+    document.getElementById('overviewContent').style.display = 'none';
+    BidAPI.getBidById(bidId).then(onBidLoaded).catch(err => showToast('Error: ' + err.message, 'error'));
+  }
+
+  function onBidLoaded(result) {
+    if (!result.success) { showToast(result.message, 'error'); return; }
+    currentBid = result.bid;
+    renderOverview();
+    renderTechActivities();
+    renderFinActivities();
+    renderBidders();
+    renderClarifications();
+    document.getElementById('overviewLoading').style.display = 'none';
+    document.getElementById('overviewContent').style.display = 'block';
+  }
+
+  // ── Overview ──
+  function renderOverview() {
+    const b = currentBid;
+    document.getElementById('topbarTitle').textContent      = b.BID_NAME || 'Bid Detail';
+    document.getElementById('breadcrumbBidName').textContent= b.BID_NAME || b.BID_NUMBER;
+    document.getElementById('ovBidNum').textContent  = b.BID_NUMBER;
+    document.getElementById('ovBidName').textContent = b.BID_NAME;
+    document.getElementById('ovPac').textContent     = b.PAC_LEVEL;
+    document.getElementById('ovMethod').textContent  = b.PURCHASE_METHOD;
+
+    const phaseEl  = document.getElementById('ovPhase');
+    const statusEl = document.getElementById('ovStatus');
+    phaseEl.textContent  = b.CURRENT_PHASE === 'TECHNICAL' ? '🔬 Technical Phase' : b.CURRENT_PHASE === 'FINANCIAL' ? '💰 Financial Phase' : '✅ Completed';
+    phaseEl.className    = 'meta-chip ' + (b.CURRENT_PHASE === 'TECHNICAL' ? 'chip-blue' : b.CURRENT_PHASE === 'FINANCIAL' ? 'chip-orange' : 'chip-green');
+    statusEl.textContent = b.STATUS;
+    statusEl.className   = 'meta-chip ' + (b.STATUS === 'COMPLETED' ? 'chip-green' : b.STATUS === 'ACTIVE' ? 'chip-blue' : 'chip-grey');
+
+    // Progress circle
+    const pct = b.overallProgress || 0;
+    const circ = 2 * Math.PI * 38;
+    const offset = circ - (pct / 100) * circ;
+    document.getElementById('circleArc').style.strokeDashoffset = offset;
+    document.getElementById('circleArc').style.stroke = pct >= 75 ? '#22C55E' : pct >= 40 ? '#F59E0B' : '#2196F3';
+    document.getElementById('circleText').textContent = pct + '%';
+
+    // Delay alerts
+    const da = document.getElementById('delayAlerts');
+    if (b.delays && b.delays.length) {
+      da.innerHTML = b.delays.map(d => `
+        <div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:12px 16px;margin-bottom:10px;display:flex;align-items:center;gap:10px;font-size:13px;">
+          <span style="font-size:18px">⚠️</span>
+          <div>
+            <strong style="color:#FCA5A5">${d.activity}</strong>
+            <span style="color:var(--grey-300);margin-left:8px">— ${d.daysDelayed} day(s) overdue</span>
+          </div>
+        </div>`).join('');
+    } else {
+      da.innerHTML = `<div style="background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.25);border-radius:10px;padding:12px 16px;margin-bottom:10px;display:flex;align-items:center;gap:10px;font-size:13px;color:#86EFAC;">✔ All activities are on track.</div>`;
+    }
+
+    // Activity summary table
+    const ta = b.techActivities || {};
+    const fa = b.finActivities  || {};
+    const acts = [
+      { label: 'Tech Doc Collection',      status: ta.TECH_DOC_STATUS },
+      { label: 'Clarification',            status: ta.CLARIFICATION_STATUS },
+      { label: 'Tech Eval Progress',        status: ta.EVAL_PROGRESS_STATUS },
+      { label: 'Tech Eval Report',          status: ta.EVAL_REPORT_STATUS },
+      { label: 'Fin Doc Collection',        status: fa.FIN_DOC_STATUS },
+      { label: 'Eng Estimation & Budget',   status: fa.ENG_EST_STATUS },
+      { label: 'Doc Authentication',        status: fa.DOC_AUTH_STATUS },
+      { label: 'Financial Eval Report',     status: fa.FIN_REPORT_STATUS }
+    ];
+    document.getElementById('activitySummary').innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        ${acts.map(a => {
+          const s = a.status || 'PENDING';
+          const cls = s === 'COMPLETED' ? 'status-completed' : s === 'ONGOING' ? 'status-ongoing' : s === 'N/A' ? 'status-pending' : 'status-pending';
+          const icon = s === 'COMPLETED' ? '✅' : s === 'ONGOING' ? '🔄' : '⏳';
+          return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.06)">
+            <span style="font-size:13px;color:var(--grey-300)">${icon} ${a.label}</span>
+            <span class="act-status-chip ${cls}">${s}</span>
+          </div>`;
+        }).join('')}
+      </div>`;
+  }
+
+  // ── Tech Activities ──
+  function renderTechActivities() {
+    const ta = currentBid.techActivities || {};
+    setDateVal('techDocStart',        ta.TECH_DOC_START);
+    setDateVal('techDocEnd',          ta.TECH_DOC_END);
+    setSelectVal('techDocStatus',     ta.TECH_DOC_STATUS     || 'PENDING');
+    setDateVal('clarificationStart',  ta.CLARIFICATION_START);
+    setDateVal('clarificationEnd',    ta.CLARIFICATION_END);
+    setSelectVal('clarificationStatus', ta.CLARIFICATION_STATUS || 'PENDING');
+    setDateVal('evalProgressStart',   ta.EVAL_PROGRESS_START);
+    setDateVal('evalProgressEnd',     ta.EVAL_PROGRESS_END);
+    setSelectVal('evalProgressStatus',ta.EVAL_PROGRESS_STATUS || 'PENDING');
+    setDateVal('evalReportStart',     ta.EVAL_REPORT_START);
+    setDateVal('evalReportEnd',       ta.EVAL_REPORT_END);
+    setSelectVal('evalReportStatus',  ta.EVAL_REPORT_STATUS  || 'PENDING');
+    ['tech-doc','clarification','eval-progress','eval-report'].forEach(refreshChip);
+    checkDelays();
+  }
+
+  function saveTechActivities() {
+    setSaving('tech', true);
+    const data = {
+      bidId              : bidId,
+      techDocStart       : document.getElementById('techDocStart').value,
+      techDocEnd         : document.getElementById('techDocEnd').value,
+      techDocStatus      : document.getElementById('techDocStatus').value,
+      clarificationStart : document.getElementById('clarificationStart').value,
+      clarificationEnd   : document.getElementById('clarificationEnd').value,
+      clarificationStatus: document.getElementById('clarificationStatus').value,
+      evalProgressStart  : document.getElementById('evalProgressStart').value,
+      evalProgressEnd    : document.getElementById('evalProgressEnd').value,
+      evalProgressStatus : document.getElementById('evalProgressStatus').value,
+      evalReportStart    : document.getElementById('evalReportStart').value,
+      evalReportEnd      : document.getElementById('evalReportEnd').value,
+      evalReportStatus   : document.getElementById('evalReportStatus').value
+    };
+    ActivityAPI.updateTechActivities(data)
+      .then(res => { setSaving('tech', false); if (res.success) { showToast('Technical activities saved.', 'success'); loadBid(); } else showToast(res.message, 'error'); })
+      .catch(err => { setSaving('tech', false); showToast(err.message, 'error'); });
+  }
+
+  // ── Financial Activities ──
+  function renderFinActivities() {
+    const fa = currentBid.finActivities || {};
+    setDateVal('finDocStart',     fa.FIN_DOC_START);
+    setDateVal('finDocEnd',       fa.FIN_DOC_END);
+    setSelectVal('finDocStatus',  fa.FIN_DOC_STATUS  || 'PENDING');
+    setDateVal('engEstStart',     fa.ENG_EST_START);
+    setDateVal('engEstEnd',       fa.ENG_EST_END);
+    setSelectVal('engEstStatus',  fa.ENG_EST_STATUS  || 'PENDING');
+    setDateVal('docAuthStart',    fa.DOC_AUTH_START);
+    setDateVal('docAuthEnd',      fa.DOC_AUTH_END);
+    setSelectVal('docAuthStatus', fa.DOC_AUTH_STATUS || 'PENDING');
+    setDateVal('finReportStart',  fa.FIN_REPORT_START);
+    setDateVal('finReportEnd',    fa.FIN_REPORT_END);
+    setSelectVal('finReportStatus', fa.FIN_REPORT_STATUS || 'PENDING');
+    ['fin-doc','eng-est','doc-auth','fin-report'].forEach(refreshChip);
+  }
+
+  function saveFinActivities() {
+    setSaving('fin', true);
+    const data = {
+      bidId          : bidId,
+      finDocStart    : document.getElementById('finDocStart').value,
+      finDocEnd      : document.getElementById('finDocEnd').value,
+      finDocStatus   : document.getElementById('finDocStatus').value,
+      engEstStart    : document.getElementById('engEstStart').value,
+      engEstEnd      : document.getElementById('engEstEnd').value,
+      engEstStatus   : document.getElementById('engEstStatus').value,
+      docAuthStart   : document.getElementById('docAuthStart').value,
+      docAuthEnd     : document.getElementById('docAuthEnd').value,
+      docAuthStatus  : document.getElementById('docAuthStatus').value,
+      finReportStart : document.getElementById('finReportStart').value,
+      finReportEnd   : document.getElementById('finReportEnd').value,
+      finReportStatus: document.getElementById('finReportStatus').value
+    };
+    ActivityAPI.updateFinActivities(data)
+      .then(res => { setSaving('fin', false); if (res.success) { showToast('Financial activities saved.', 'success'); loadBid(); } else showToast(res.message, 'error'); })
+      .catch(err => { setSaving('fin', false); showToast(err.message, 'error'); });
+  }
+
+  // ── Bidders ──
+  let editBidders = [];
+  function renderBidders() {
+    editBidders = JSON.parse(JSON.stringify(currentBid.bidders || []));
+    newBidderRows = [];
+    rebuildBidderTable();
+  }
+  function rebuildBidderTable() {
+    const tbody = document.getElementById('bidderTableBody');
+    if (!editBidders.length && !newBidderRows.length) {
+      tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">🏢</div>No bidders added yet.</div></td></tr>`;
+      return;
+    }
+    const allRows = [...editBidders.map(b => ({ ...b, isNew: false })), ...newBidderRows.map(b => ({ ...b, isNew: true }))];
+    tbody.innerHTML = allRows.map((b, i) => {
+      const rank = b.RANK || (i + 1);
+      const rankCls = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : 'rank-n';
+      const maxScore = 200;
+      const pct = Math.min(100, ((parseFloat(b.TOTAL_SCORE) || 0) / maxScore) * 100);
+      const rid = b.isNew ? 'new_' + b._newId : 'ex_' + b.BIDDER_ID;
+      return `<tr>
+        <td><div class="rank-badge ${rankCls}">${rank}</div></td>
+        <td><input class="inline-input" id="${rid}_name" value="${b.BIDDER_NAME || ''}" placeholder="Bidder name"/></td>
+        <td><input class="inline-input" type="number" id="${rid}_tech" value="${b.TECHNICAL_SCORE || 0}" min="0" max="100" style="width:80px" oninput="calcRowTotal('${rid}')"/></td>
+        <td><input class="inline-input" type="number" id="${rid}_fin"  value="${b.FINANCIAL_SCORE  || 0}" min="0" max="100" style="width:80px" oninput="calcRowTotal('${rid}')"/></td>
+        <td>
+          <div class="score-bar-wrap">
+            <div class="score-bar"><div class="score-bar-fill" id="${rid}_bar" style="width:${pct}%"></div></div>
+            <strong id="${rid}_total" style="font-size:13px;color:var(--gold);min-width:36px">${parseFloat(b.TOTAL_SCORE || 0).toFixed(1)}</strong>
+          </div>
+        </td>
+        <td>
+          <select class="inline-select" id="${rid}_rec">
+            <option value="NO"  ${b.RECOMMENDED !== 'YES' ? 'selected' : ''}>No</option>
+            <option value="YES" ${b.RECOMMENDED === 'YES' ? 'selected' : ''}>★ Yes</option>
+          </select>
+        </td>
+        <td><input class="inline-input" id="${rid}_notes" value="${b.NOTES || ''}" placeholder="Notes…" style="width:120px"/></td>
+        <td><button class="btn-remove-row" onclick="removeBidderRow('${rid}', ${b.isNew}, '${b.BIDDER_ID || ''}', ${b._newId || 0})">✕</button></td>
+      </tr>`;
+    }).join('');
+  }
+  function calcRowTotal(rid) {
+    const t = parseFloat(document.getElementById(rid + '_tech').value) || 0;
+    const f = parseFloat(document.getElementById(rid + '_fin').value)  || 0;
+    const total = t + f;
+    document.getElementById(rid + '_total').textContent = total.toFixed(1);
+    const pct = Math.min(100, (total / 200) * 100);
+    document.getElementById(rid + '_bar').style.width = pct + '%';
+  }
+  let newBidderCounter = 0;
+  function addNewBidderRow() {
+    newBidderCounter++;
+    newBidderRows.push({ _newId: newBidderCounter, BIDDER_NAME: '', TECHNICAL_SCORE: 0, FINANCIAL_SCORE: 0, TOTAL_SCORE: 0, RECOMMENDED: 'NO', NOTES: '', RANK: editBidders.length + newBidderRows.length + 1 });
+    rebuildBidderTable();
+  }
+  function removeBidderRow(rid, isNew, bidderId, newId) {
+    if (isNew) { newBidderRows = newBidderRows.filter(r => r._newId !== newId); }
+    else { editBidders = editBidders.filter(b => b.BIDDER_ID !== bidderId); }
+    rebuildBidderTable();
+  }
+  function saveBidders() {
+    setSaving('bidder', true);
+    const allRows = [
+      ...editBidders.map(b => ({ ...b, isNew: false })),
+      ...newBidderRows.map(b => ({ ...b, isNew: true }))
+    ];
+    const saveQueue = allRows.map(b => {
+      const rid = b.isNew ? 'new_' + b._newId : 'ex_' + b.BIDDER_ID;
+      return {
+        bidId         : bidId,
+        bidderId      : b.BIDDER_ID || null,
+        bidderName    : (document.getElementById(rid + '_name')  || {}).value || b.BIDDER_NAME,
+        technicalScore: (document.getElementById(rid + '_tech')  || {}).value || 0,
+        financialScore: (document.getElementById(rid + '_fin')   || {}).value || 0,
+        recommended   : (document.getElementById(rid + '_rec')   || {}).value || 'NO',
+        notes         : (document.getElementById(rid + '_notes') || {}).value || '',
+        isNew         : b.isNew
+      };
+    }).filter(b => b.bidderName);
+
+    let idx = 0;
+    function next() {
+      if (idx >= saveQueue.length) { setSaving('bidder', false); showToast('Bidders saved successfully.', 'success'); loadBid(); return; }
+      const b = saveQueue[idx++];
+      if (b.isNew) {
+        BidderAPI.addBidder(b).then(next).catch(e => { setSaving('bidder', false); showToast(e.message, 'error'); });
+      } else {
+        BidderAPI.updateBidder(b).then(next).catch(e => { setSaving('bidder', false); showToast(e.message, 'error'); });
+      }
+    }
+    next();
+  }
+
+  // ── Clarifications ──
+  let editClarifs = [];
+  function renderClarifications() {
+    editClarifs = JSON.parse(JSON.stringify(currentBid.clarifications || []));
+    newClarifRows = [];
+    const badge = document.getElementById('clarifBadge');
+    const pending = editClarifs.filter(c => c.STATUS === 'PENDING').length;
+    badge.style.display = pending ? 'inline' : 'none';
+    badge.textContent   = pending;
+    rebuildClarifTable();
+  }
+  function rebuildClarifTable() {
+    const tbody = document.getElementById('clarifTableBody');
+    if (!editClarifs.length && !newClarifRows.length) {
+      tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">❓</div>No clarifications added.</div></td></tr>`;
+      return;
+    }
+    const allRows = [...editClarifs.map(c => ({ ...c, isNew: false })), ...newClarifRows.map(c => ({ ...c, isNew: true }))];
+    tbody.innerHTML = allRows.map((c, i) => {
+      const cid = c.isNew ? 'nc_' + c._newId : 'ec_' + c.CLARIFICATION_ID;
+      const reqDate = c.REQUEST_DATE  ? new Date(c.REQUEST_DATE).toISOString().split('T')[0]  : '';
+      const resDate = c.RESPONSE_DATE ? new Date(c.RESPONSE_DATE).toISOString().split('T')[0] : '';
+      const statusCls = c.STATUS === 'RESPONDED' ? 'clarif-responded' : c.STATUS === 'CLOSED' ? 'clarif-closed' : 'clarif-pending';
+      return `<tr>
+        <td style="color:var(--grey-500);font-size:12px">${i + 1}</td>
+        <td><input class="inline-input" id="${cid}_subj"   value="${c.SUBJECT || ''}" placeholder="Clarification subject…" style="width:200px"/></td>
+        <td><input class="inline-input" type="date" id="${cid}_req"  value="${reqDate}" style="width:140px"/></td>
+        <td><input class="inline-input" type="date" id="${cid}_res"  value="${resDate}" style="width:140px"/></td>
+        <td>
+          <select class="inline-select" id="${cid}_status">
+            <option value="PENDING"    ${c.STATUS === 'PENDING'    ? 'selected' : ''}>Pending</option>
+            <option value="RESPONDED"  ${c.STATUS === 'RESPONDED'  ? 'selected' : ''}>Responded</option>
+            <option value="CLOSED"     ${c.STATUS === 'CLOSED'     ? 'selected' : ''}>Closed</option>
+          </select>
+        </td>
+        <td><input class="inline-input" id="${cid}_notes" value="${c.NOTES || ''}" placeholder="Notes…" style="width:130px"/></td>
+        <td><button class="btn-remove-row" onclick="removeClarifRow('${cid}', ${c.isNew}, '${c.CLARIFICATION_ID || ''}', ${c._newId || 0})">✕</button></td>
+      </tr>`;
+    }).join('');
+  }
+  let newClarifCounter = 0;
+  function addNewClarifRow() {
+    newClarifCounter++;
+    newClarifRows.push({ _newId: newClarifCounter, SUBJECT: '', REQUEST_DATE: new Date().toISOString().split('T')[0], RESPONSE_DATE: '', STATUS: 'PENDING', NOTES: '' });
+    rebuildClarifTable();
+  }
+  function removeClarifRow(cid, isNew, clarifId, newId) {
+    if (isNew) { newClarifRows = newClarifRows.filter(r => r._newId !== newId); }
+    else { editClarifs = editClarifs.filter(c => c.CLARIFICATION_ID !== clarifId); }
+    rebuildClarifTable();
+  }
+  function saveClarifications() {
+    setSaving('clarif', true);
+    const allRows = [...editClarifs.map(c => ({ ...c, isNew: false })), ...newClarifRows.map(c => ({ ...c, isNew: true }))];
+    const saveQueue = allRows.map(c => {
+      const cid = c.isNew ? 'nc_' + c._newId : 'ec_' + c.CLARIFICATION_ID;
+      return {
+        bidId          : bidId,
+        clarificationId: c.CLARIFICATION_ID || null,
+        subject        : (document.getElementById(cid + '_subj')   || {}).value || '',
+        requestDate    : (document.getElementById(cid + '_req')    || {}).value || '',
+        responseDate   : (document.getElementById(cid + '_res')    || {}).value || '',
+        status         : (document.getElementById(cid + '_status') || {}).value || 'PENDING',
+        notes          : (document.getElementById(cid + '_notes')  || {}).value || '',
+        isNew          : c.isNew
+      };
+    }).filter(c => c.subject);
+
+    let idx = 0;
+    function next() {
+      if (idx >= saveQueue.length) { setSaving('clarif', false); showToast('Clarifications saved.', 'success'); loadBid(); return; }
+      const c = saveQueue[idx++];
+      if (c.isNew) {
+        ClarifAPI.addClarification(c).then(next).catch(e => { setSaving('clarif', false); showToast(e.message, 'error'); });
+      } else {
+        ClarifAPI.updateClarification(c).then(next).catch(e => { setSaving('clarif', false); showToast(e.message, 'error'); });
+      }
+    }
+    next();
+  }
+
+  // ── Helpers ──
+  function setDateVal(id, val) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.value = val ? new Date(val).toISOString().split('T')[0] : '';
+  }
+  function setSelectVal(id, val) {
+    const el = document.getElementById(id);
+    if (!el || !val) return;
+    el.value = val;
+  }
+
+  const chipMap = {
+    'tech-doc'       : { statusId: 'techDocStatus',      chipId: 'chip-tech-doc',      actId: 'act-tech-doc'       },
+    'clarification'  : { statusId: 'clarificationStatus',chipId: 'chip-clarification', actId: 'act-clarification'  },
+    'eval-progress'  : { statusId: 'evalProgressStatus', chipId: 'chip-eval-progress', actId: 'act-eval-progress'  },
+    'eval-report'    : { statusId: 'evalReportStatus',   chipId: 'chip-eval-report',   actId: 'act-eval-report'    },
+    'fin-doc'        : { statusId: 'finDocStatus',       chipId: 'chip-fin-doc',       actId: 'act-fin-doc'        },
+    'eng-est'        : { statusId: 'engEstStatus',       chipId: 'chip-eng-est',       actId: 'act-eng-est'        },
+    'doc-auth'       : { statusId: 'docAuthStatus',      chipId: 'chip-doc-auth',      actId: 'act-doc-auth'       },
+    'fin-report'     : { statusId: 'finReportStatus',    chipId: 'chip-fin-report',    actId: 'act-fin-report'     }
+  };
+  function refreshChip(key) {
+    const m = chipMap[key];
+    if (!m) return;
+    const status = (document.getElementById(m.statusId) || {}).value || 'PENDING';
+    const chip   = document.getElementById(m.chipId);
+    const card   = document.getElementById(m.actId);
+    if (!chip || !card) return;
+    chip.textContent = status;
+    chip.className   = 'act-status-chip ' + (status === 'COMPLETED' ? 'status-completed' : status === 'ONGOING' ? 'status-ongoing' : status === 'N/A' ? 'status-pending' : 'status-pending');
+    card.className   = 'activity-item ' + (status === 'COMPLETED' ? 'completed' : '');
+  }
+
+  function checkDelays() {
+    const delays = (currentBid && currentBid.delays) || [];
+    const actLabelMap = {
+      'Tech Doc Collection'  : 'tech-doc',
+      'Clarification'        : 'clarification',
+      'Tech Eval Progress'   : 'eval-progress',
+      'Tech Eval Report'     : 'eval-report',
+      'Fin Doc Collection'   : 'fin-doc',
+      'Eng Estimation'       : 'eng-est',
+      'Doc Authentication'   : 'doc-auth',
+      'Financial Eval Report': 'fin-report'
+    };
+    delays.forEach(d => {
+      const key = actLabelMap[d.activity];
+      if (!key) return;
+      const warn = document.getElementById('delay-' + key);
+      const card = document.getElementById('act-' + key);
+      if (warn) { warn.style.display = 'flex'; warn.textContent = `⚠ ${d.daysDelayed} day(s) overdue`; }
+      if (card)   card.classList.add('delayed');
+    });
+  }
+
+  function setSaving(type, on) {
+    const txtMap = { tech: 'techSaveTxt', fin: 'finSaveTxt', bidder: 'bidderSaveTxt', clarif: 'clarifSaveTxt' };
+    const spnMap = { tech: 'techSaveSpinner', fin: 'finSaveSpinner', bidder: 'bidderSaveSpinner', clarif: 'clarifSaveSpinner' };
+    document.getElementById(txtMap[type]).style.display = on ? 'none' : 'inline';
+    document.getElementById(spnMap[type]).style.display = on ? 'inline-block' : 'none';
+  }
+
+  function showToast(msg, type) {
+    const t = document.getElementById('toast');
+    document.getElementById('toastIcon').textContent = type === 'error' ? '❌ ' : type === 'success' ? '✅ ' : 'ℹ️ ';
+    document.getElementById('toastMsg').textContent  = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3200);
+  }
+
+  // ── Boot ──
+  loadBid();
+</script>
+</body>
+</html>
