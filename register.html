@@ -6,177 +6,83 @@
 <title>Bid Evaluation Portal — Register Bid</title>
 <script src="apps.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --navy:        #0D1B2A;
-    --navy-mid:    #1A2E45;
-    --navy-light:  #243B55;
-    --navy-card:   #162032;
-    --accent:      #2196F3;
-    --accent-dark: #1565C0;
-    --gold:        #FFC107;
-    --white:       #FFFFFF;
-    --grey-100:    #F5F7FA;
-    --grey-300:    #CBD5E1;
-    --grey-500:    #64748B;
-    --grey-700:    #334155;
-    --danger:      #EF4444;
-    --warning:     #F59E0B;
-    --success:     #22C55E;
-    --radius:      10px;
-    --radius-lg:   16px;
-    --sidebar-w:   240px;
-  }
-
-  html, body { height: 100%; font-family: 'Inter', sans-serif; background: var(--navy); color: var(--white); }
-
-  .app { display: flex; height: 100vh; }
-
-  /* ── Sidebar ── */
-  .sidebar {
-    width: var(--sidebar-w); background: var(--navy-card);
-    border-right: 1px solid rgba(255,255,255,0.06);
-    display: flex; flex-direction: column; flex-shrink: 0;
-  }
-  .sidebar-logo { padding: 22px 20px 18px; border-bottom: 1px solid rgba(255,255,255,0.06); }
-  .logo-mark { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-  .logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent), var(--accent-dark)); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
-  .logo-text { font-size: 14px; font-weight: 700; line-height: 1.2; }
-  .logo-text span { display: block; font-size: 10px; font-weight: 400; color: var(--grey-500); letter-spacing: 0.05em; }
-  .sidebar-nav { flex: 1; padding: 16px 10px; display: flex; flex-direction: column; gap: 2px; }
-  .nav-section-label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--grey-500); padding: 12px 10px 6px; }
-  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--grey-300); cursor: pointer; transition: all 0.15s; border: none; background: none; width: 100%; text-align: left; }
-  .nav-item:hover  { background: rgba(255,255,255,0.05); color: var(--white); }
-  .nav-item.active { background: rgba(33,150,243,0.15); color: var(--accent); }
-  .nav-item .icon  { font-size: 16px; width: 20px; text-align: center; }
-  .sidebar-user { padding: 14px 16px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; gap: 10px; }
-  .user-avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent-dark)); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0; }
-  .user-info { flex: 1; min-width: 0; }
-  .user-info strong { display: block; font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .user-info span { font-size: 11px; color: var(--grey-500); }
-  .btn-logout { background: none; border: none; color: var(--grey-500); cursor: pointer; font-size: 16px; padding: 4px; transition: color 0.15s; }
-  .btn-logout:hover { color: var(--danger); }
-
-  /* ── Main ── */
-  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-
-  .topbar { padding: 16px 28px; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; gap: 16px; background: var(--navy-card); flex-shrink: 0; }
-  .topbar h1 { font-size: 18px; font-weight: 700; flex: 1; }
-  .breadcrumb { font-size: 12px; color: var(--grey-500); display: flex; align-items: center; gap: 6px; }
-  .breadcrumb a { color: var(--accent); cursor: pointer; text-decoration: none; }
-  .breadcrumb a:hover { text-decoration: underline; }
-
-  .content { flex: 1; overflow-y: auto; padding: 32px 40px; }
-
-  /* ── Form layout ── */
-  .section-card {
-    background: var(--navy-card); border: 1px solid rgba(255,255,255,0.06);
-    border-radius: var(--radius-lg); padding: 26px 28px; margin-bottom: 24px;
-    max-width: 980px;
-  }
-  .section-card-title {
-    display: flex; align-items: center; gap: 10px;
-    font-size: 14px; font-weight: 700; margin-bottom: 22px;
-    padding-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.06);
-    color: var(--grey-300);
-  }
-  .section-card-title .sect-icon { font-size: 18px; }
-
-  .fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-  .fields-grid .span-2 { grid-column: 1 / -1; }
-
-  /* ── Form elements ── */
-  .form-group { display: flex; flex-direction: column; gap: 7px; }
-  .form-group label { font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--grey-300); }
-  .form-group label .req { color: var(--danger); margin-left: 2px; }
-
-  .form-group input,
-  .form-group select,
-  .form-group textarea {
-    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-    border-radius: var(--radius); padding: 11px 14px;
-    font-size: 13px; font-family: 'Inter', sans-serif; color: var(--white);
-    outline: none; transition: border-color 0.2s, background 0.2s;
-    width: 100%;
-  }
-  .form-group select { cursor: pointer; }
-  .form-group select option { background: var(--navy-mid); color: var(--white); }
-  .form-group input::placeholder, .form-group textarea::placeholder { color: var(--grey-500); }
-  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-    border-color: var(--accent); background: rgba(33,150,243,0.07);
-  }
-  .form-group textarea { resize: vertical; min-height: 80px; }
-  .form-hint { font-size: 11px; color: var(--grey-500); }
-
-  /* ── Bidder table ── */
-  .bidder-table-wrap { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; }
-  thead th { padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--grey-500); border-bottom: 1px solid rgba(255,255,255,0.07); }
-  tbody tr { border-bottom: 1px solid rgba(255,255,255,0.04); }
-  tbody tr:last-child { border-bottom: none; }
-  tbody td { padding: 10px 12px; vertical-align: top; }
-  tbody td input, tbody td select { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 7px; padding: 8px 10px; font-size: 13px; color: var(--white); font-family: 'Inter', sans-serif; outline: none; width: 100%; transition: border-color 0.2s; }
-  tbody td input:focus, tbody td select:focus { border-color: var(--accent); }
-  tbody td select option { background: var(--navy-mid); }
-
-  .btn-remove-bidder { background: none; border: 1px solid rgba(239,68,68,0.3); color: var(--danger); border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 12px; transition: all 0.15s; }
-  .btn-remove-bidder:hover { background: rgba(239,68,68,0.12); }
-
-  .btn-add-bidder { display: inline-flex; align-items: center; gap: 7px; margin-top: 14px; padding: 9px 16px; background: rgba(33,150,243,0.12); border: 1px dashed rgba(33,150,243,0.4); border-radius: 8px; color: var(--accent); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; font-family: 'Inter', sans-serif; }
-  .btn-add-bidder:hover { background: rgba(33,150,243,0.2); }
-
-  /* ── Clarification table ── */
-  .clarif-table-wrap { overflow-x: auto; }
-
-  /* ── Action bar ── */
-  .action-bar { display: flex; align-items: center; gap: 12px; padding: 20px 40px; border-top: 1px solid rgba(255,255,255,0.06); background: var(--navy-card); flex-shrink: 0; }
-  .btn { display: inline-flex; align-items: center; gap: 7px; padding: 10px 22px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; font-family: 'Inter', sans-serif; }
-  .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent-dark)); color: var(--white); }
-  .btn-primary:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
-  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-  .btn-outline { background: transparent; border: 1px solid rgba(255,255,255,0.12); color: var(--grey-300); }
-  .btn-outline:hover { background: rgba(255,255,255,0.05); color: var(--white); }
-
-  .spinner-inline { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: var(--white); border-radius: 50%; animation: spin 0.7s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* Alert */
-  .alert { border-radius: var(--radius); padding: 12px 16px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 10px; margin-bottom: 20px; max-width: 980px; }
-  .alert.error   { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); color: #FCA5A5; }
-  .alert.success { background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.3); color: #86EFAC; }
-  .alert.hidden  { display: none; }
-
-  /* Step indicator */
-  .step-indicator { display: flex; align-items: center; gap: 0; margin-bottom: 28px; max-width: 980px; }
-  .step { display: flex; align-items: center; gap: 0; flex: 1; }
-  .step-dot { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; transition: all 0.3s; }
-  .step-dot.active   { background: var(--accent); color: var(--white); }
-  .step-dot.done     { background: var(--success); color: var(--white); }
-  .step-dot.inactive { background: rgba(255,255,255,0.08); color: var(--grey-500); }
-  .step-label { font-size: 11px; font-weight: 600; margin-left: 8px; color: var(--grey-300); white-space: nowrap; }
-  .step-line { flex: 1; height: 1px; background: rgba(255,255,255,0.1); margin: 0 12px; }
-
-  /* Score display */
-  .score-display { display: flex; align-items: center; gap: 6px; padding: 8px 12px; background: rgba(33,150,243,0.08); border: 1px solid rgba(33,150,243,0.2); border-radius: 8px; font-size: 13px; color: var(--grey-300); }
-  .score-display strong { color: var(--gold); font-size: 16px; }
-
-  @media (max-width: 800px) {
-    .sidebar { display: none; }
-    .fields-grid { grid-template-columns: 1fr; }
-    .fields-grid .span-2 { grid-column: 1; }
-    .content { padding: 20px; }
-    .action-bar { padding: 16px 20px; }
-  }
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{--navy:#0D1B2A;--navy-mid:#1A2E45;--navy-card:#162032;--accent:#2196F3;--accent-dark:#1565C0;--gold:#FFC107;--white:#FFFFFF;--grey-300:#CBD5E1;--grey-500:#64748B;--danger:#EF4444;--success:#22C55E;--radius:10px;--radius-lg:16px;--sidebar-w:220px}
+  html,body{height:100%;font-family:'Inter',sans-serif;background:var(--navy);color:var(--white)}
+  .app{display:flex;height:100vh}
+  .sidebar{width:var(--sidebar-w);background:var(--navy-card);border-right:1px solid rgba(255,255,255,0.06);display:flex;flex-direction:column;flex-shrink:0}
+  .sidebar-logo{padding:16px 16px 14px;border-bottom:1px solid rgba(255,255,255,0.06)}
+  .logo-mark{display:flex;align-items:center;gap:9px;cursor:pointer}
+  .logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--accent-dark));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+  .logo-text{font-size:13px;font-weight:700;line-height:1.2}
+  .logo-text span{display:block;font-size:10px;font-weight:400;color:var(--grey-500)}
+  .sidebar-nav{flex:1;padding:12px 8px;display:flex;flex-direction:column;gap:2px}
+  .nav-section-label{font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--grey-500);padding:10px 10px 5px}
+  .nav-item{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:8px;font-size:13px;font-weight:500;color:var(--grey-300);cursor:pointer;transition:all 0.15s;border:none;background:none;width:100%;text-align:left}
+  .nav-item:hover{background:rgba(255,255,255,0.05);color:var(--white)}
+  .nav-item.active{background:rgba(33,150,243,0.15);color:var(--accent)}
+  .nav-item .icon{font-size:15px;width:18px;text-align:center}
+  .sidebar-user{padding:12px 14px;border-top:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;gap:9px}
+  .user-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-dark));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+  .user-info{flex:1;min-width:0}
+  .user-info strong{display:block;font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .user-info span{font-size:10px;color:var(--grey-500)}
+  .btn-logout{background:none;border:none;color:var(--grey-500);cursor:pointer;font-size:15px;padding:3px;transition:color 0.15s}
+  .btn-logout:hover{color:var(--danger)}
+  .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+  .topbar{padding:12px 22px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;background:var(--navy-card);flex-shrink:0}
+  .topbar h1{font-size:16px;font-weight:700;flex:1}
+  .breadcrumb{font-size:11px;color:var(--grey-500)}
+  .breadcrumb a{color:var(--accent);cursor:pointer;text-decoration:none}
+  .content{flex:1;overflow-y:auto;padding:20px 28px}
+  .section-card{background:var(--navy-card);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius-lg);padding:20px 22px;margin-bottom:18px;max-width:960px}
+  .section-card-title{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:700;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.06);color:var(--grey-300)}
+  .fields-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .fields-grid .span-2{grid-column:1/-1}
+  .form-group{display:flex;flex-direction:column;gap:5px}
+  .form-group label{font-size:11px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--grey-300)}
+  .form-group label .req{color:var(--danger);margin-left:2px}
+  .form-group input,.form-group select,.form-group textarea{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius);padding:9px 12px;font-size:13px;font-family:'Inter',sans-serif;color:var(--white);outline:none;transition:border-color 0.2s;width:100%}
+  .form-group select{cursor:pointer}
+  .form-group select option{background:var(--navy-mid)}
+  .form-group input::placeholder,.form-group textarea::placeholder{color:var(--grey-500)}
+  .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--accent);background:rgba(33,150,243,0.07)}
+  .form-group textarea{resize:vertical;min-height:64px}
+  .form-hint{font-size:11px;color:var(--grey-500)}
+  .bidder-table-wrap,.clarif-table-wrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse}
+  thead th{padding:9px 10px;text-align:left;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--grey-500);border-bottom:1px solid rgba(255,255,255,0.07)}
+  tbody tr{border-bottom:1px solid rgba(255,255,255,0.04)}
+  tbody tr:last-child{border-bottom:none}
+  tbody td{padding:8px 10px;vertical-align:top}
+  tbody td input,tbody td select{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:7px;padding:7px 9px;font-size:12px;color:var(--white);font-family:'Inter',sans-serif;outline:none;width:100%;transition:border-color 0.2s}
+  tbody td input:focus,tbody td select:focus{border-color:var(--accent)}
+  tbody td select option{background:var(--navy-mid)}
+  .btn-remove-bidder{background:none;border:1px solid rgba(239,68,68,0.3);color:var(--danger);border-radius:6px;padding:5px 8px;cursor:pointer;font-size:11px;transition:all 0.15s}
+  .btn-remove-bidder:hover{background:rgba(239,68,68,0.12)}
+  .btn-add-bidder{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:8px 14px;background:rgba(33,150,243,0.12);border:1px dashed rgba(33,150,243,0.4);border-radius:8px;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;font-family:'Inter',sans-serif}
+  .btn-add-bidder:hover{background:rgba(33,150,243,0.2)}
+  .action-bar{display:flex;align-items:center;gap:10px;padding:14px 28px;border-top:1px solid rgba(255,255,255,0.06);background:var(--navy-card);flex-shrink:0}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all 0.15s;font-family:'Inter',sans-serif}
+  .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:var(--white)}
+  .btn-primary:hover:not(:disabled){opacity:0.88;transform:translateY(-1px)}
+  .btn-primary:disabled{opacity:0.5;cursor:not-allowed}
+  .btn-outline{background:transparent;border:1px solid rgba(255,255,255,0.12);color:var(--grey-300)}
+  .btn-outline:hover{background:rgba(255,255,255,0.05);color:var(--white)}
+  .spinner-inline{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:var(--white);border-radius:50%;animation:spin 0.7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .alert{border-radius:var(--radius);padding:10px 14px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:9px;margin-bottom:16px;max-width:960px}
+  .alert.error{background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);color:#FCA5A5}
+  .alert.success{background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.3);color:#86EFAC}
+  .alert.hidden{display:none}
+  .score-display{display:flex;align-items:center;gap:5px;padding:6px 10px;background:rgba(33,150,243,0.08);border:1px solid rgba(33,150,243,0.2);border-radius:7px;font-size:12px;color:var(--grey-300)}
+  .score-display strong{color:var(--gold);font-size:14px}
+  @media(max-width:800px){.sidebar{display:none}.fields-grid{grid-template-columns:1fr}.fields-grid .span-2{grid-column:1}.content{padding:14px}.action-bar{padding:12px 14px}}
 </style>
 </head>
 <body>
-
 <div class="app">
-
-  <!-- ── Sidebar ── -->
   <aside class="sidebar">
     <div class="sidebar-logo">
       <div class="logo-mark" onclick="goTo('dashboard')">
@@ -192,422 +98,152 @@
     </nav>
     <div class="sidebar-user">
       <div class="user-avatar" id="userAvatar">A</div>
-      <div class="user-info">
-        <strong id="userNameSidebar">—</strong>
-        <span id="userRoleSidebar">—</span>
-      </div>
+      <div class="user-info"><strong id="userNameSidebar">—</strong><span id="userRoleSidebar">—</span></div>
       <button class="btn-logout" onclick="doLogout()" title="Sign out">⏻</button>
     </div>
   </aside>
-
-  <!-- ── Main ── -->
   <div class="main">
-
-    <!-- Topbar -->
     <div class="topbar">
       <div style="flex:1">
         <h1>Register New Bid</h1>
-        <div class="breadcrumb">
-          <a onclick="goTo('dashboard')">Dashboard</a> › Register Bid
-        </div>
+        <div class="breadcrumb"><a onclick="goTo('dashboard')">Dashboard</a> › Register Bid</div>
       </div>
     </div>
-
-    <!-- Content -->
     <div class="content">
-
-      <!-- Step indicator -->
-      <div class="step-indicator">
-        <div class="step">
-          <div class="step-dot active" id="step1dot">1</div>
-          <span class="step-label">Bid Information</span>
-        </div>
-        <div class="step-line"></div>
-        <div class="step">
-          <div class="step-dot inactive" id="step2dot">2</div>
-          <span class="step-label">Bidders</span>
-        </div>
-        <div class="step-line"></div>
-        <div class="step">
-          <div class="step-dot inactive" id="step3dot">3</div>
-          <span class="step-label">Clarifications</span>
-        </div>
-        <div class="step-line"></div>
-        <div class="step">
-          <div class="step-dot inactive" id="step4dot">4</div>
-          <span class="step-label">Review & Submit</span>
-        </div>
-      </div>
-
-      <!-- Alert -->
       <div id="alertBox" class="alert hidden"><span id="alertIcon"></span><span id="alertMsg"></span></div>
-
-      <!-- ══ SECTION 1: Bid Information ══ -->
-      <div class="section-card" id="sec1">
-        <div class="section-card-title"><span class="sect-icon">📄</span> Bid Information</div>
+      <div class="section-card">
+        <div class="section-card-title">📄 Bid Information</div>
         <div class="fields-grid">
-
-          <div class="form-group">
-            <label>Bid Number <span class="req">*</span></label>
-            <input type="text" id="bidNumber" placeholder="e.g. BID-2024-001" oninput="clearAlert()"/>
-            <span class="form-hint">Unique identifier for this bid</span>
-          </div>
-
-          <div class="form-group">
-            <label>Bid Name <span class="req">*</span></label>
-            <input type="text" id="bidName" placeholder="e.g. Supply of Office Equipment" oninput="clearAlert()"/>
-          </div>
-
-          <div class="form-group">
-            <label>PAC Level <span class="req">*</span></label>
-            <select id="pacLevel">
-              <option value="">— Select PAC Level —</option>
-              <option value="PAC ONE">PAC ONE</option>
-              <option value="PAC TWO">PAC TWO</option>
-              <option value="PAC THREE">PAC THREE</option>
-              <option value="PAC FOUR">PAC FOUR</option>
-            </select>
-            <span class="form-hint">Purchase Approving Committee level</span>
-          </div>
-
-          <div class="form-group">
-            <label>Purchase Method <span class="req">*</span></label>
-            <select id="purchaseMethod">
-              <option value="">— Select Method —</option>
-              <option value="OPEN BID">Open Bid</option>
-              <option value="DIRECT PURCHASE">Direct Purchase</option>
-              <option value="PROFORMA">Proforma</option>
-            </select>
-          </div>
-
-          <div class="form-group span-2">
-            <label>Notes / Remarks</label>
-            <textarea id="bidNotes" placeholder="Any additional notes about this bid…"></textarea>
-          </div>
-
+          <div class="form-group"><label>Bid Number <span class="req">*</span></label><input type="text" id="bidNumber" placeholder="e.g. BID-2024-001" oninput="clearAlert()"/><span class="form-hint">Unique identifier for this bid</span></div>
+          <div class="form-group"><label>Bid Name <span class="req">*</span></label><input type="text" id="bidName" placeholder="e.g. Supply of Office Equipment" oninput="clearAlert()"/></div>
+          <div class="form-group"><label>PAC Level <span class="req">*</span></label><select id="pacLevel"><option value="">— Select PAC Level —</option><option value="PAC ONE">PAC ONE</option><option value="PAC TWO">PAC TWO</option><option value="PAC THREE">PAC THREE</option><option value="PAC FOUR">PAC FOUR</option></select><span class="form-hint">Purchase Approving Committee level</span></div>
+          <div class="form-group"><label>Purchase Method <span class="req">*</span></label><select id="purchaseMethod"><option value="">— Select Method —</option><option value="OPEN BID">Open Bid</option><option value="DIRECT PURCHASE">Direct Purchase</option><option value="PROFORMA">Proforma</option></select></div>
+          <div class="form-group span-2"><label>Notes / Remarks</label><textarea id="bidNotes" placeholder="Any additional notes about this bid…"></textarea></div>
         </div>
       </div>
-
-      <!-- ══ SECTION 2: Bidders ══ -->
-      <div class="section-card" id="sec2">
-        <div class="section-card-title"><span class="sect-icon">🏢</span> Bidders & Scores</div>
-
+      <div class="section-card">
+        <div class="section-card-title">🏢 Bidders & Scores</div>
         <div class="bidder-table-wrap">
-          <table id="bidderTable">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Bidder Name <span style="color:var(--danger)">*</span></th>
-                <th>Technical Score</th>
-                <th>Financial Score</th>
-                <th>Total Score</th>
-                <th>Recommended</th>
-                <th>Notes</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="bidderRows"></tbody>
-          </table>
+          <table><thead><tr><th>#</th><th>Bidder Name *</th><th>Technical Score</th><th>Financial Score</th><th>Total</th><th>Recommended</th><th>Notes</th><th></th></tr></thead>
+          <tbody id="bidderRows"></tbody></table>
         </div>
-
-        <button class="btn-add-bidder" onclick="addBidderRow()">
-          ＋ Add Bidder
-        </button>
+        <button class="btn-add-bidder" onclick="addBidderRow()">＋ Add Bidder</button>
       </div>
-
-      <!-- ══ SECTION 3: Clarifications ══ -->
-      <div class="section-card" id="sec3">
-        <div class="section-card-title"><span class="sect-icon">❓</span> Clarification Requests <span style="font-size:12px;font-weight:400;color:var(--grey-500);margin-left:6px">(optional)</span></div>
-
+      <div class="section-card">
+        <div class="section-card-title">❓ Clarification Requests <span style="font-size:11px;font-weight:400;color:var(--grey-500);margin-left:6px">(optional)</span></div>
         <div class="clarif-table-wrap">
-          <table id="clarifTable">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Subject <span style="color:var(--danger)">*</span></th>
-                <th>Request Date <span style="color:var(--danger)">*</span></th>
-                <th>Expected Response Date</th>
-                <th>Status</th>
-                <th>Notes</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="clarifRows"></tbody>
-          </table>
+          <table><thead><tr><th>#</th><th>Subject *</th><th>Request Date *</th><th>Expected Response</th><th>Status</th><th>Notes</th><th></th></tr></thead>
+          <tbody id="clarifRows"></tbody></table>
         </div>
-
-        <button class="btn-add-bidder" onclick="addClarifRow()">
-          ＋ Add Clarification
-        </button>
+        <button class="btn-add-bidder" onclick="addClarifRow()">＋ Add Clarification</button>
       </div>
-
-      <!-- ══ SECTION 4: Review ══ -->
-      <div class="section-card" id="sec4">
-        <div class="section-card-title"><span class="sect-icon">✅</span> Review Summary</div>
-        <div id="reviewContent" style="color:var(--grey-500);font-size:13px;">Fill in the form above and click "Review" to see a summary.</div>
-      </div>
-
-    </div><!-- /content -->
-
-    <!-- Action bar -->
+    </div>
     <div class="action-bar">
       <button class="btn btn-outline" onclick="goTo('dashboard')">← Cancel</button>
-      <button class="btn btn-outline" onclick="buildReview()">👁 Review</button>
       <button class="btn btn-primary" id="submitBtn" onclick="submitBid()">
         <span id="submitBtnText">📋 Register Bid</span>
         <span id="submitSpinner" style="display:none" class="spinner-inline"></span>
       </button>
     </div>
-
-  </div><!-- /main -->
-</div><!-- /app -->
-
+  </div>
+</div>
 <script>
-  // ── Guard: only redirect if Session.guard exists AND user is not logged in ──
-  // This prevents a crash if apps.js hasn't fully loaded yet
-  if (typeof Session !== 'undefined' && typeof Session.guard === 'function') {
-    Session.guard();
-  } else {
-    // Fallback: wait for apps.js to load then check
-    window.addEventListener('load', function() {
-      if (typeof Session !== 'undefined' && typeof Session.guard === 'function') {
-        Session.guard();
-      }
-    });
-  }
+  Session.guard();
+  window.addEventListener('load',()=>UI.initUserBar());
+  function goTo(p){window.location.href=p+'.html'}
+  function doLogout(){UI.doLogout()}
+  function showAlert(msg,type){const b=document.getElementById('alertBox');document.getElementById('alertIcon').textContent=type==='error'?'⚠️':'✅';document.getElementById('alertMsg').textContent=msg;b.className='alert '+type;b.scrollIntoView({behavior:'smooth',block:'nearest'})}
+  function clearAlert(){document.getElementById('alertBox').className='alert hidden'}
 
-  // Init user UI safely
-  window.addEventListener('load', function() {
-    if (typeof UI !== 'undefined' && typeof UI.initUserBar === 'function') {
-      UI.initUserBar();
-    }
-  });
-
-  function goTo(page) { window.location.href = page + '.html'; }
-  function doLogout() {
-    if (typeof UI !== 'undefined' && typeof UI.doLogout === 'function') {
-      UI.doLogout();
-    } else {
-      window.location.href = 'login.html';
-    }
-  }
-
-  // ── Alert ──
-  function showAlert(msg, type) {
-    const box = document.getElementById('alertBox');
-    document.getElementById('alertIcon').textContent = type === 'error' ? '⚠️ ' : '✅ ';
-    document.getElementById('alertMsg').textContent  = msg;
-    box.className = 'alert ' + type;
-    box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
-  function clearAlert() { document.getElementById('alertBox').className = 'alert hidden'; }
-
-  // ──────────────────────────────────────────────
-  //  BIDDERS
-  // ──────────────────────────────────────────────
-  let bidderCount = 0;
-  function addBidderRow() {
-    bidderCount++;
-    const n   = bidderCount;
-    const row = document.createElement('tr');
-    row.id    = 'bdr_' + n;
-    row.innerHTML = `
-      <td style="color:var(--grey-500);font-size:12px;width:30px">${n}</td>
-      <td><input type="text" id="bdr_name_${n}" placeholder="Company / Bidder name"/></td>
+  let bidderCount=0;
+  function addBidderRow(){
+    bidderCount++;const n=bidderCount;
+    const row=document.createElement('tr');row.id='bdr_'+n;
+    row.innerHTML=`<td style="color:var(--grey-500);font-size:11px;width:24px">${n}</td>
+      <td><input type="text" id="bdr_name_${n}" placeholder="Company name"/></td>
       <td><input type="number" id="bdr_tech_${n}" placeholder="0" min="0" max="100" oninput="calcTotal(${n})"/></td>
-      <td><input type="number" id="bdr_fin_${n}"  placeholder="0" min="0" max="100" oninput="calcTotal(${n})"/></td>
-      <td>
-        <div class="score-display">
-          Total: <strong id="bdr_total_${n}">0</strong>
-        </div>
-      </td>
-      <td>
-        <select id="bdr_rec_${n}">
-          <option value="NO">No</option>
-          <option value="YES">Yes</option>
-        </select>
-      </td>
+      <td><input type="number" id="bdr_fin_${n}" placeholder="0" min="0" max="100" oninput="calcTotal(${n})"/></td>
+      <td><div class="score-display">Total: <strong id="bdr_total_${n}">0</strong></div></td>
+      <td><select id="bdr_rec_${n}"><option value="NO">No</option><option value="YES">Yes</option></select></td>
       <td><input type="text" id="bdr_notes_${n}" placeholder="Notes…"/></td>
       <td><button class="btn-remove-bidder" onclick="removeBidderRow(${n})">✕</button></td>`;
     document.getElementById('bidderRows').appendChild(row);
   }
-  function removeBidderRow(n) { const r = document.getElementById('bdr_' + n); if (r) r.remove(); }
-  function calcTotal(n) {
-    const t = parseFloat(document.getElementById('bdr_tech_' + n).value) || 0;
-    const f = parseFloat(document.getElementById('bdr_fin_' + n).value)  || 0;
-    document.getElementById('bdr_total_' + n).textContent = (t + f).toFixed(1);
+  function removeBidderRow(n){const r=document.getElementById('bdr_'+n);if(r)r.remove()}
+  function calcTotal(n){
+    const t=parseFloat(document.getElementById('bdr_tech_'+n).value)||0;
+    const f=parseFloat(document.getElementById('bdr_fin_'+n).value)||0;
+    document.getElementById('bdr_total_'+n).textContent=(t+f).toFixed(1);
   }
-  function getBidders() {
-    const rows = [];
-    for (let i = 1; i <= bidderCount; i++) {
-      const name = document.getElementById('bdr_name_' + i);
-      if (!name) continue;
-      rows.push({
-        bidderName    : name.value.trim(),
-        technicalScore: document.getElementById('bdr_tech_' + i).value,
-        financialScore: document.getElementById('bdr_fin_' + i).value,
-        recommended   : document.getElementById('bdr_rec_' + i).value,
-        notes         : document.getElementById('bdr_notes_' + i).value
-      });
+  function getBidders(){
+    const rows=[];
+    for(let i=1;i<=bidderCount;i++){
+      const name=document.getElementById('bdr_name_'+i);if(!name)continue;
+      const v={bidderName:name.value.trim(),technicalScore:document.getElementById('bdr_tech_'+i).value,financialScore:document.getElementById('bdr_fin_'+i).value,recommended:document.getElementById('bdr_rec_'+i).value,notes:document.getElementById('bdr_notes_'+i).value};
+      if(v.bidderName)rows.push(v);
     }
-    return rows.filter(r => r.bidderName);
+    return rows;
   }
-
-  // Add one row by default
   addBidderRow();
 
-  // ──────────────────────────────────────────────
-  //  CLARIFICATIONS
-  // ──────────────────────────────────────────────
-  let clarifCount = 0;
-  function addClarifRow() {
-    clarifCount++;
-    const n   = clarifCount;
-    const row = document.createElement('tr');
-    row.id    = 'clf_' + n;
-    const today = new Date().toISOString().split('T')[0];
-    row.innerHTML = `
-      <td style="color:var(--grey-500);font-size:12px;width:30px">${n}</td>
+  let clarifCount=0;
+  function addClarifRow(){
+    clarifCount++;const n=clarifCount;
+    const row=document.createElement('tr');row.id='clf_'+n;
+    const today=new Date().toISOString().split('T')[0];
+    row.innerHTML=`<td style="color:var(--grey-500);font-size:11px;width:24px">${n}</td>
       <td><input type="text" id="clf_subj_${n}" placeholder="Clarification subject…"/></td>
-      <td><input type="date" id="clf_req_${n}"  value="${today}"/></td>
+      <td><input type="date" id="clf_req_${n}" value="${today}"/></td>
       <td><input type="date" id="clf_res_${n}"/></td>
-      <td>
-        <select id="clf_status_${n}">
-          <option value="PENDING">Pending</option>
-          <option value="RESPONDED">Responded</option>
-          <option value="CLOSED">Closed</option>
-        </select>
-      </td>
+      <td><select id="clf_status_${n}"><option value="PENDING">Pending</option><option value="RESPONDED">Responded</option><option value="CLOSED">Closed</option></select></td>
       <td><input type="text" id="clf_notes_${n}" placeholder="Notes…"/></td>
       <td><button class="btn-remove-bidder" onclick="removeClarifRow(${n})">✕</button></td>`;
     document.getElementById('clarifRows').appendChild(row);
   }
-  function removeClarifRow(n) { const r = document.getElementById('clf_' + n); if (r) r.remove(); }
-  function getClarifications() {
-    const rows = [];
-    for (let i = 1; i <= clarifCount; i++) {
-      const subj = document.getElementById('clf_subj_' + i);
-      if (!subj) continue;
-      rows.push({
-        subject     : subj.value.trim(),
-        requestDate : document.getElementById('clf_req_' + i).value,
-        responseDate: document.getElementById('clf_res_' + i).value,
-        status      : document.getElementById('clf_status_' + i).value,
-        notes       : document.getElementById('clf_notes_' + i).value
-      });
+  function removeClarifRow(n){const r=document.getElementById('clf_'+n);if(r)r.remove()}
+  function getClarifications(){
+    const rows=[];
+    for(let i=1;i<=clarifCount;i++){
+      const s=document.getElementById('clf_subj_'+i);if(!s)continue;
+      const v={subject:s.value.trim(),requestDate:document.getElementById('clf_req_'+i).value,responseDate:document.getElementById('clf_res_'+i).value,status:document.getElementById('clf_status_'+i).value,notes:document.getElementById('clf_notes_'+i).value};
+      if(v.subject)rows.push(v);
     }
-    return rows.filter(r => r.subject);
+    return rows;
   }
 
-  // ──────────────────────────────────────────────
-  //  REVIEW
-  // ──────────────────────────────────────────────
-  function buildReview() {
-    const bidNumber  = document.getElementById('bidNumber').value.trim();
-    const bidName    = document.getElementById('bidName').value.trim();
-    const pacLevel   = document.getElementById('pacLevel').value;
-    const method     = document.getElementById('purchaseMethod').value;
-    const bidders    = getBidders();
-    const clarifs    = getClarifications();
-
-    const html = `
-      <table style="width:100%;border-collapse:collapse;font-size:13px">
-        <tr style="border-bottom:1px solid rgba(255,255,255,0.07)">
-          <td style="padding:8px 0;color:var(--grey-500);width:160px">Bid Number</td>
-          <td style="padding:8px 0;font-weight:600">${bidNumber || '<span style="color:var(--danger)">Missing</span>'}</td>
-        </tr>
-        <tr style="border-bottom:1px solid rgba(255,255,255,0.07)">
-          <td style="padding:8px 0;color:var(--grey-500)">Bid Name</td>
-          <td style="padding:8px 0;font-weight:600">${bidName || '<span style="color:var(--danger)">Missing</span>'}</td>
-        </tr>
-        <tr style="border-bottom:1px solid rgba(255,255,255,0.07)">
-          <td style="padding:8px 0;color:var(--grey-500)">PAC Level</td>
-          <td style="padding:8px 0">${pacLevel || '<span style="color:var(--danger)">Missing</span>'}</td>
-        </tr>
-        <tr style="border-bottom:1px solid rgba(255,255,255,0.07)">
-          <td style="padding:8px 0;color:var(--grey-500)">Purchase Method</td>
-          <td style="padding:8px 0">${method || '<span style="color:var(--danger)">Missing</span>'}</td>
-        </tr>
-        <tr style="border-bottom:1px solid rgba(255,255,255,0.07)">
-          <td style="padding:8px 0;color:var(--grey-500)">Bidders</td>
-          <td style="padding:8px 0">${bidders.length ? bidders.map((b,i) => `<div>${i+1}. <strong>${b.bidderName}</strong> — Tech: ${b.technicalScore||0}, Fin: ${b.financialScore||0}, Total: ${(parseFloat(b.technicalScore||0)+parseFloat(b.financialScore||0)).toFixed(1)} ${b.recommended==='YES'?'<span style="color:var(--gold)">★ Recommended</span>':''}</div>`).join('') : '<span style="color:var(--grey-500)">None added</span>'}</td>
-        </tr>
-        <tr>
-          <td style="padding:8px 0;color:var(--grey-500)">Clarifications</td>
-          <td style="padding:8px 0">${clarifs.length ? clarifs.map((c,i) => `<div>${i+1}. ${c.subject} <span style="color:var(--grey-500)">(${c.requestDate})</span></div>`).join('') : '<span style="color:var(--grey-500)">None</span>'}</td>
-        </tr>
-      </table>`;
-    document.getElementById('reviewContent').innerHTML = html;
-    document.getElementById('sec4').scrollIntoView({ behavior: 'smooth' });
-  }
-
-  // ──────────────────────────────────────────────
-  //  SUBMIT
-  // ──────────────────────────────────────────────
-  function submitBid() {
+  async function submitBid(){
     clearAlert();
-    const bidNumber      = document.getElementById('bidNumber').value.trim();
-    const bidName        = document.getElementById('bidName').value.trim();
-    const pacLevel       = document.getElementById('pacLevel').value;
-    const purchaseMethod = document.getElementById('purchaseMethod').value;
-    const notes          = document.getElementById('bidNotes').value.trim();
-
-    if (!bidNumber)      { showAlert('Bid Number is required.', 'error'); return; }
-    if (!bidName)        { showAlert('Bid Name is required.', 'error'); return; }
-    if (!pacLevel)       { showAlert('Please select a PAC Level.', 'error'); return; }
-    if (!purchaseMethod) { showAlert('Please select a Purchase Method.', 'error'); return; }
-
-    const bidders = getBidders();
-    const clarifs = getClarifications();
-
+    const bidNumber=document.getElementById('bidNumber').value.trim();
+    const bidName=document.getElementById('bidName').value.trim();
+    const pacLevel=document.getElementById('pacLevel').value;
+    const purchaseMethod=document.getElementById('purchaseMethod').value;
+    const notes=document.getElementById('bidNotes').value.trim();
+    if(!bidNumber){showAlert('Bid Number is required.','error');return}
+    if(!bidName){showAlert('Bid Name is required.','error');return}
+    if(!pacLevel){showAlert('Please select a PAC Level.','error');return}
+    if(!purchaseMethod){showAlert('Please select a Purchase Method.','error');return}
+    const bidders=getBidders();
+    const clarifs=getClarifications();
     setSubmitting(true);
-
-    const bidData = { bidNumber, bidName, pacLevel, purchaseMethod, notes };
-
-    BidAPI.registerBid(bidData)
-      .then(res => {
-        if (!res.success) { setSubmitting(false); showAlert(res.message, 'error'); return; }
-        const bidId = res.bidId;
-
-        const saveBidders = (list, cb) => {
-          if (!list.length) { cb(); return; }
-          const b = list.shift();
-          b.bidId = bidId;
-          BidderAPI.addBidder(b)
-            .then(() => saveBidders(list, cb))
-            .catch(e => console.error('Bidder save error:', e));
-        };
-
-        const saveClarifs = (list, cb) => {
-          if (!list.length) { cb(); return; }
-          const c = list.shift();
-          c.bidId = bidId;
-          ClarifAPI.addClarification(c)
-            .then(() => saveClarifs(list, cb))
-            .catch(e => console.error('Clarif save error:', e));
-        };
-
-        saveBidders([...bidders], () => {
-          saveClarifs([...clarifs], () => {
-            setSubmitting(false);
-            showAlert('Bid registered successfully! Redirecting…', 'success');
-            setTimeout(() => {
-              localStorage.setItem('currentBidId', bidId);
-              window.location.href = 'bidDetail.html';
-            }, 1200);
-          });
-        });
-      })
-      .catch(err => {
-        setSubmitting(false);
-        showAlert('Error: ' + err.message, 'error');
-      });
+    try{
+      const res=await BidAPI.registerBid({bidNumber,bidName,pacLevel,purchaseMethod,notes});
+      if(!res.success){setSubmitting(false);showAlert(res.message,'error');return}
+      const bidId=res.bidId;
+      // ✅ PARALLEL saves — all bidders and clarifs at once
+      await Promise.all([
+        BidderAPI.addBiddersBatch(bidders,bidId),
+        ClarifAPI.addClarifsBatch(clarifs,bidId)
+      ]);
+      setSubmitting(false);
+      showAlert('Bid registered successfully! Redirecting…','success');
+      BidAPI.invalidateCache();
+      setTimeout(()=>{localStorage.setItem('currentBidId',bidId);window.location.href='bidDetail.html'},800);
+    }catch(err){setSubmitting(false);showAlert('Error: '+err.message,'error')}
   }
-
-  function setSubmitting(on) {
-    document.getElementById('submitBtn').disabled           = on;
-    document.getElementById('submitBtnText').style.display  = on ? 'none' : 'inline';
-    document.getElementById('submitSpinner').style.display  = on ? 'inline-block' : 'none';
+  function setSubmitting(on){
+    document.getElementById('submitBtn').disabled=on;
+    document.getElementById('submitBtnText').style.display=on?'none':'inline';
+    document.getElementById('submitSpinner').style.display=on?'inline-block':'none';
   }
 </script>
 </body>
