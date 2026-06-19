@@ -3,7 +3,7 @@
 //  Include this in every HTML page via <script src="apps.js">
 // ============================================================
 
-const APP_URL = "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec";
+const APP_URL = "https://script.google.com/macros/s/AKfycbzpAR52VWNqAlW7N7aqC3StIaTAGmWTE1tDfI0a5YRs6GRB7jqjksYj6HR0eCgwnV0n/exec";
 // ↑ Replace YOUR_DEPLOYMENT_ID with your actual deployment ID after deploying
 
 // ──────────────────────────────────────────────
